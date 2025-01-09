@@ -78,12 +78,15 @@ pipeline {
                   //Define variable
 		def dockerImageName = "carapp"
 		def dockerTag = "1.0"
+		def dockerRepoUrl = "43.205.214.232:5067/repository/carapp_docker/carapp"
 		
 
 		echo "Building Docker image..."
 		sh """
-            	docker build -t carapp:1.0 -f docker/Dockerfile docker
+            	docker build -t ${dockerImageName}:${dockerTag} -f docker/Dockerfile docker
 		pwd
+		docker tag ${dockerImageName}:${dockerTag} ${dockerRepoUrl}:${dockerTag}
+		docker push ${dockerRepoUrl}:${dockerTag}
             	"""
 
                 }
