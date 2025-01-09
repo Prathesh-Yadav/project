@@ -1,0 +1,39 @@
+---
+- name: Find the WAR file in the webapps directory
+  ansible.builtin.find:
+    paths: /home/tomcat1/apache-tomcat-10.1.31/webapps
+    patterns:
+      - 'SimpleWebApplication-*.war'
+      - 'SimpleWebApplication-*'
+    recurse: yes
+  register: war_file
+
+- name: Check if any file is found
+  debug:
+    msg: "Found file: {{ item.path }}"
+  loop: "{{ war_file.files }}"
+  when: war_file.matched > 0
+
+- name: Take backup of the previous version application
+  ansible.builtin.command:
+    cmd: mv "{{ war_file.files[0].path }}" /home/tomcat1/apache-tomcat-10.1.31/webapps/backup/
+  when: war_file.matched > 0
+
+- name: Display message if no file is found
+  debug:
+    msg: "No WAR or application file found in the webapps directory."
+  when: war_file.matched == 0
+
+#- name: Check if old WAR file exists
+#  stat:
+#    path: /home/tomcat1/apache-tomcat-10.1.31/webapps/*.war
+#  register: war_file_check
+
+#- name: take the backup of old war
+#  copy:
+#    src: /home/tomcat1/apache-tomcat-10.1.31/webapps/*.war
+#    dest: /home/tomcat1/apache-tomcat-10.1.31/webapps/backup
+#    remote_src: yes
+#  when: war_file_check.stat.exists ---
+# tasks file for back_up_war_file
+

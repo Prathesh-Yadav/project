@@ -1,0 +1,43 @@
+---
+- name: Fetch maven-metadata.xml content from Nexus
+  uri:
+    url: "{{ metadata_url }}"
+    method: GET
+    user: "{{ nexus_username }}"
+    password: "{{ nexus_password }}"
+    force_basic_auth: yes
+    return_content: yes
+  register: metadata_content
+
+- name: Save the content to a temporary file
+  copy:
+    content: "{{ metadata_content.content }}"
+    dest: /tmp/maven-metadata.xml
+
+- name: Extract latest version from maven-metadata.xml using shell command
+  shell: "grep '<value>' /tmp/maven-metadata.xml | sed -e 's/.*<value>\\(.*\\)<\\/value>/\\1/'"
+  register: version_output
+
+- name: Set the latest artifact version variable
+  set_fact:
+    latest_artifact_version: "{{ version_output.stdout }}"
+
+- name: Display the latest version extracted
+  debug:
+    msg: "Latest Artifact Version: {{ latest_artifact_version }}"
+
+- name: Clean up temporary file
+  file:
+    path: /tmp/maven-metadata.xml
+    state: absent
+
+- name: Download WAR from Nexus
+  get_url:
+    url: "{{ app_url }}"
+    dest: /home/tomcat1/apache-tomcat-10.1.31/webapps/
+    mode: 0755
+    owner: tomcat1
+    group: tomcat1
+    username: "{{ nexus_username }}"
+    password: "{{ nexus_password }}"
+  register: download_war
