@@ -79,10 +79,21 @@ pipeline {
 def dockerImageName = "carapp"
 def dockerRepoUrl = "43.205.214.232:5067/repository/carapp_docker/carapp"
 
-// Fetch the latest tag from Nexus repository (for example, using curl or Nexus API)
-def latestTag = sh(script: "curl -s ${dockerRepoUrl}/v2/carapp/tags/list | jq -r '.tags | sort | last'", returnStdout: true).trim()
+// Fetch the list of tags from the Nexus repository
+def response = sh(script: "curl -s ${dockerRepoUrl}/v2/carapp/tags/list", returnStdout: true).trim()
+echo "Response: ${response}"
 
-// Split the latest tag to get the version number (assumes version in x.y format)
+def latestTag
+if (response) {
+    // Get the latest tag from the Nexus repository
+    latestTag = sh(script: "echo ${response} | jq -r '.tags | sort | last'", returnStdout: true).trim()
+    echo "Latest Tag: ${latestTag}"
+} else {
+    echo "No tags found. Setting default tag to 1.0"
+    latestTag = "0.0"
+}
+
+// Split the latest tag to extract the major and minor version numbers
 def latestVersion = latestTag.tokenize('.')
 def major = latestVersion[0].toInteger()
 def minor = latestVersion[1].toInteger()
@@ -98,15 +109,16 @@ if (minor == 10) {
 
 // Construct the new tag
 def newTag = "${major}.${minor}"
+echo "New Tag to use: ${newTag}"
 
-echo "Building Docker image with new tag: ${newTag}"
-
+// Build and tag the image with the new tag
 sh """
     docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
     pwd
     docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
     docker push ${dockerRepoUrl}:${newTag}
 """
+
                 }
          }
      }
