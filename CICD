@@ -1,7 +1,7 @@
 
 pipeline {
   agent {
-    label "Java"
+    label "java"
   }
   stages {
     stage('Build') {
@@ -55,12 +55,12 @@ pipeline {
             file: 'target/SimpleWebApplication.war', 
             type: 'war'
           ]], 
-          credentialsId: 'nexus-ssh', 
+          credentialsId: 'nexus', 
           groupId: 'com.maven', 
-          nexusUrl: '13.233.197.98:8081/', 
+          nexusUrl: '43.205.214.232/:8081/', 
           nexusVersion: 'nexus3', 
           protocol: 'http', 
-          repository: 'maven-snapshots', 
+          repository: 'carapp', 
           version: '1.0.0-SNAPSHOT'
         )
       }
@@ -72,6 +72,7 @@ pipeline {
     }
   }
 */
+/*
   stage('Download Latest WAR from Nexus') {
     agent {
         label "Tomcat1"
@@ -96,7 +97,7 @@ pipeline {
                 }
          }
      }
-
+*/
       
 /*
     stage('Deploy to Tomcat') {
