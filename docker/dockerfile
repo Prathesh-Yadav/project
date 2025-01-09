@@ -1,4 +1,4 @@
-FROM amazonlinux
+FROM amazonlinux:2
 RUN yum update -y && yum install -y java-17-amazon-corretto-devel shadow-utils tar gzip vi findutils wget curl
 RUN mkdir -p /home/tomcat
 RUN useradd -d /home/tomcat -s /bin/bash tomcat
