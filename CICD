@@ -83,36 +83,12 @@ pipeline {
 		echo "Building Docker image..."
 		sh """
             	docker build -t carapp:1.0 -f docker/Dockerfile docker
+		pwd
             	"""
 
                 }
          }
      }
 
-      
-/*
-    stage('Deploy to Tomcat') {
-      agent {
-        label "Tomcat1"
-      }
-      steps {
-        sh 'sudo systemctl stop tomcat'
-      
-        sh 'sudo cp /home/tomcat/apache-tomcat-10.1.30/webapps/SimpleWebApplication*.war /home/tomcat/apache-tomcat-10.1.30/webapps/SimpleWebApplication_backup_$(date +"%Y%m%d%H%M%S").war || true'
-        
-        sh '''
-                #!/bin/bash
-               NEXUS_URL="http://13.201.120.172:8081/repository/maven-releases-javawebapp/http://13.201.120.172:8081/repository/maven-releases-javawebapp/com/maven/SimpleWebApplication/1.0.0/SimpleWebApplication-1.0.0.war"
-               LATEST_BUILD= curl -s "$NEXUS_URL" | tail -4 | head -1 | grep SimpleWebApplication-1.0.0-*.*-*.war
-             
-                wget --user=admin --password=admin http://13.201.120.172:8081/repository/maven-releases-javawebapp/com/maven/SimpleWebApplication/1.0.0/SimpleWebApplication-1.0.0.war -O /home/tomcat/apache-tomcat-10.1.30/webapps/
-                  
-      
-    '''
-        
-        sh 'sudo systemctl start tomcat'
-      }
-    }
-  */
   }
 }
