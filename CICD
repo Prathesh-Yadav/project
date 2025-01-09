@@ -82,7 +82,7 @@ pipeline {
 
 		echo "Building Docker image..."
 		sh """
-            	docker build -t ${dockerImageName}:${dockerTag} ./docker/dockerfile
+            	docker build -t carapp:1.0 -f project/docker/dockerfile project/docker
             	"""
 
                 }
