@@ -3,6 +3,8 @@ pipeline {
   agent {
     label "java"
   }
+  environment {
+    PATH = "/apache-maven-3.9.9/bin:/usr/bin:/bin:/usr/local/bin"
   stages {
     stage('Build') {
       steps {
