@@ -76,50 +76,67 @@ pipeline {
     steps {
 	script {
 //Define variable
-// Define the repository URL and authentication credentials (if needed)
-def dockerRepoUrl = "43.205.214.232:5067/repository/carapp_docker/carapp"
-def dockerUsername = "admin"  // Your Nexus username
-def dockerPassword = "your_password_here"  // Your Nexus password
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Define variables within the script block
+                    def dockerImageName = "carapp"
+                    def dockerTag = "1.0"
+                    def dockerRepoUrl = "43.205.214.232:5067/repository/carapp_docker/carapp"
+                    def dockerUsername = "admin"  // Your Nexus username
+                    def dockerPassword = "admin"  // Your Nexus password
 
-// Fetch the list of tags from the Nexus repository with the correct headers and authentication
-def response = sh(script: "curl -u ${dockerUsername}:${dockerPassword} -s -H 'Accept: application/vnd.docker.distribution.manifest.v2+json' ${dockerRepoUrl}/v2/carapp/tags/list", returnStdout: true).trim()
-echo "Response: ${response}"
+                    echo "Building Docker image..."
 
-def latestTag
-if (response) {
-    // Get the latest tag from the Nexus repository
-    latestTag = sh(script: "echo ${response} | jq -r '.tags | sort | last'", returnStdout: true).trim()
-    echo "Latest Tag: ${latestTag}"
-} else {
-    echo "No tags found. Setting default tag to 1.0"
-    latestTag = "0.0"
+                    // Fetch the list of tags from the Nexus repository with the correct headers and authentication
+                    def response = sh(script: "curl -u ${dockerUsername}:${dockerPassword} -s -H 'Accept: application/vnd.docker.distribution.manifest.v2+json' ${dockerRepoUrl}/v2/carapp/tags/list", returnStdout: true).trim()
+                    echo "Response: ${response}"
+
+                    def latestTag
+                    if (response) {
+                        // Get the latest tag from the Nexus repository
+                        latestTag = sh(script: "echo ${response} | jq -r '.tags | sort | last'", returnStdout: true).trim()
+                        echo "Latest Tag: ${latestTag}"
+                    } else {
+                        echo "No tags found. Setting default tag to 1.0"
+                        latestTag = "0.0"
+                    }
+
+                    // Split the latest tag to extract the major and minor version numbers
+                    def latestVersion = latestTag.tokenize('.')
+                    def major = latestVersion[0].toInteger()
+                    def minor = latestVersion[1].toInteger()
+
+                    // Increment the minor version
+                    minor++
+
+                    // If minor reaches 10, increment the major version and reset minor to 0
+                    if (minor == 10) {
+                        major++
+                        minor = 0
+                    }
+
+                    // Construct the new tag
+                    def newTag = "${major}.${minor}"
+                    echo "New Tag to use: ${newTag}"
+
+                    // Build and tag the image with the new tag
+                    sh """
+                        docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
+                        pwd
+                        docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
+                        docker push ${dockerRepoUrl}:${newTag}
+                    """
+                }
+            }
+        }
+    }
 }
 
-// Split the latest tag to extract the major and minor version numbers
-def latestVersion = latestTag.tokenize('.')
-def major = latestVersion[0].toInteger()
-def minor = latestVersion[1].toInteger()
-
-// Increment the minor version
-minor++
-
-// If minor reaches 10, increment the major version and reset minor to 0
-if (minor == 10) {
-    major++
-    minor = 0
-}
-
-// Construct the new tag
-def newTag = "${major}.${minor}"
-echo "New Tag to use: ${newTag}"
-
-// Build and tag the image with the new tag
-sh """
-    docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
-    pwd
-    docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
-    docker push ${dockerRepoUrl}:${newTag}
-"""
 
                 }
          }
