@@ -75,14 +75,6 @@ pipeline {
     }
     steps {
 	script {
-//Define variable
-pipeline {
-    agent any
-    
-    stages {
-        stage('Build Docker Image') {
-            steps {
-                script {
                     // Define variables within the script block
                     def dockerImageName = "carapp"
                     def dockerTag = "1.0"
@@ -131,13 +123,6 @@ pipeline {
                         docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
                         docker push ${dockerRepoUrl}:${newTag}
                     """
-                }
-            }
-        }
-    }
-}
-
-
                 }
          }
      }
