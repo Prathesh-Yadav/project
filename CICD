@@ -68,39 +68,27 @@ pipeline {
         )
       }
     }
-  /*
-  stage('Send build artifacts over SSH) { 
-      steps{
-	sshPublisher(publishers: [sshPublisherDesc(config Name: 'Tomcat_Deploy", transfers: [sshTransfer(cleanRemote: false, excludes:", execCommand: ", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: 'L.]+*, remoteDirectory: 'apache-tomcat-10.1.30/webapps', remoteDirectorySDF: false, removePrefix: ", sourceFiles: SimpleWebApplication.war')], usePromotionTimestamp: false, use WorkspacelnPromotion: false, verbose: false)
-    }
-  }
-*/
-/*
-  stage('Download Latest WAR from Nexus') {
+
+  stage('Download Latest WAR from Nexus, Build image and push back to nexus') {
     agent {
-        label "Tomcat1"
+        label "docker"
     }
     steps {
 	script {
-                    // Download maven-metadata.xml from Nexus
-                    sh """
-                    curl -u admin:admin -O http://13.233.197.98:8081/repository/maven-snapshots/com/maven/SimpleWebApplication/1.0.0-SNAPSHOT/maven-metadata.xml
-		    pwd
-		    ls -al
-      		    """
-      		    def value = sh(script: "grep '<value>' maven-metadata.xml | sed -e 's/.*<value>\\(.*\\)<\\/value>/\\1/'", returnStdout: true).trim()
-        	    echo "Latest Artifact Version: $value"
-		    sh """
-      		    sudo systemctl stop tomcat
-		    curl -u admin:admin -O http://13.233.197.98:8081/repository/maven-snapshots/com/maven/SimpleWebApplication/1.0.0-SNAPSHOT/SimpleWebApplication-${value}.war
-		    pwd
-		    """
-                    sh "cp SimpleWebApplication-${value}.war /home/tomcat1/apache-tomcat-10.1.31/webapps"
-		    sh 'sudo systemctl start tomcat'
+                  //Define variable
+		def dockerImageName = "carapp"
+		def dockerTag = "1.0"
+		
+
+		echo "Building Docker image..."
+		sh """
+            	docker build -t ${dockerImageName}:${dockerTag} ./docker/dockerfile
+            	"""
+
                 }
          }
      }
-*/
+
       
 /*
     stage('Deploy to Tomcat') {
