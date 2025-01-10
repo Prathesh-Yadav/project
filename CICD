@@ -75,54 +75,65 @@ pipeline {
     }
     steps {
 	script {
-                    // Define variables within the script block
-                    def dockerImageName = "carapp"
-                    def dockerTag = "1.0"
-                    def dockerRepoUrl = "13.233.77.239:5067/repository/carapp_docker/carapp"
-                    def dockerUsername = "admin"  // Your Nexus username
-                    def dockerPassword = "admin"  // Your Nexus password
-
-                    echo "Building Docker image..."
-
-                    // Fetch the list of tags from the Nexus repository with the correct headers and authentication
-                    def response = sh(script: "curl -u ${dockerUsername}:${dockerPassword} -s -H 'Accept: application/vnd.docker.distribution.manifest.v2+json' ${dockerRepoUrl}/v2/carapp/tags/list", returnStdout: true).trim()
-                    echo "Response: ${response}"
-
-                    def latestTag
-                    if (response) {
-                        // Get the latest tag from the Nexus repository
-                        latestTag = sh(script: "echo ${response} | jq -r '.tags | sort | last'", returnStdout: true).trim()
-                        echo "Latest Tag: ${latestTag}"
-                    } else {
-                        echo "No tags found. Setting default tag to 1.0"
-                        latestTag = "0.0"
-                    }
-
-                    // Split the latest tag to extract the major and minor version numbers
-                    def latestVersion = latestTag.tokenize('.')
-                    def major = latestVersion[0].toInteger()
-                    def minor = latestVersion[1].toInteger()
-
-                    // Increment the minor version
-                    minor++
-
-                    // If minor reaches 10, increment the major version and reset minor to 0
-                    if (minor == 10) {
-                        major++
-                        minor = 0
-                    }
-
-                    // Construct the new tag
-                    def newTag = "${major}.${minor}"
-                    echo "New Tag to use: ${newTag}"
-
-                    // Build and tag the image with the new tag
-                    sh """
-                        docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
-                        pwd
-                        docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
-                        docker push ${dockerRepoUrl}:${newTag}
-                    """
+	    def dockerImageName = "carapp"
+	    def dockerRepoUrl = "13.233.77.239:5067/repository/carapp_docker/carapp"
+	    def dockerUsername = "admin"  // Your Nexus username
+	    def dockerPassword = "admin"  // Your Nexus password
+	
+	    stage('Determine Latest Tag') {
+	        echo "Fetching existing tags from the repository..."
+	        // Fetch the list of tags from the Nexus repository
+	        def response = sh(
+	            script: """
+	                curl -u ${dockerUsername}:${dockerPassword} -s \
+	                ${dockerRepoUrl}/v2/carapp/tags/list
+	            """,
+	            returnStdout: true
+	        ).trim()
+	
+	        echo "Response from Nexus: ${response}"
+	
+	        def latestTag = "0.0" // Default tag (not used, but fallback)
+	        def newTag = "0.1" // Default tag when no tags exist
+	
+	        if (response && response.contains('"tags"')) {
+	            def tagsJson = readJSON text: response
+	            def tags = tagsJson.tags
+	            if (tags && tags.size() > 0) {
+	                echo "Tags found: ${tags}"
+	                // Sort the tags numerically
+	                tags = tags.sort { a, b ->
+	                    def aParts = a.tokenize('.').collect { it.toInteger() }
+	                    def bParts = b.tokenize('.').collect { it.toInteger() }
+	                    aParts <=> bParts
+	                }
+	                latestTag = tags.last() // Get the latest tag
+	                echo "Latest Tag: ${latestTag}"
+	
+	                // Increment the tag
+	                def versionParts = latestTag.tokenize('.')
+	                def major = versionParts[0].toInteger()
+	                def minor = versionParts[1].toInteger()
+	                minor++
+	                if (minor == 10) {
+	                    major++
+	                    minor = 0
+	                }
+	                newTag = "${major}.${minor}"
+	            } else {
+	                echo "No tags found in the repository. Using default tag 0.1."
+	            }
+	        }
+	
+	        echo "New Tag to use: ${newTag}"
+	
+	        stage('Build and Push Docker Image') {
+	            echo "Building and pushing the Docker image with tag ${newTag}..."
+	            sh """
+	                docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
+	                docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
+	                docker push ${dockerRepoUrl}:${newTag}
+	            """
                 }
          }
      }
