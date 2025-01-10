@@ -5,13 +5,14 @@ pipeline {
   environment {
     PATH = "/apache-maven-3.9.9/bin:/usr/bin:/bin:/usr/local/bin"
 	}
+/*
   stages {
     stage('Build') {
       steps {
         sh 'mvn clean install'
       }
     }
-    
+    */
     stage('jacoco') {
       steps {
         jacoco()
@@ -115,18 +116,18 @@ pipeline {
 		        latestTag = tags.last() // Get the latest tag
 		        echo "Latest Tag: ${latestTag}"
 		
-		        // Increment the tag
+		        // Increment the tag (insert your logic here)
 		        def versionParts = latestTag.tokenize('.')
 		        def major = versionParts[0].toInteger()
 		        def minor = versionParts[1].toInteger()
 		        minor++
-		        
+		
 		        // If minor reaches 10, increment major and reset minor to 0
 		        if (minor == 10) {
 		            major++
 		            minor = 0
 		        }
-		        
+		
 		        // Set the new tag
 		        newTag = "${major}.${minor}"
 		    } else {
@@ -137,13 +138,14 @@ pipeline {
 		}
 		
 		echo "New Tag to use: ${newTag}"
-		
+		/*
 	        echo "Building and pushing the Docker image with tag ${newTag}..."
 	        sh """
 	            docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
 	            docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
 	            docker push ${dockerRepoUrl}:${newTag}
 	        """
+*/
                 }
          }
      }
