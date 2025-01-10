@@ -138,18 +138,17 @@ pipeline {
 		}
 		
 		echo "New Tag to use: ${newTag}"
-		/*
 	        echo "Building and pushing the Docker image with tag ${newTag}..."
 	        sh """
 	            docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
 	            docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
 	            docker push ${dockerRepoUrl}:${newTag}
 	        """
-		*/
+		
                 }
          }
      }
 
   }
 }
-
+}
