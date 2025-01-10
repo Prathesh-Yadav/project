@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: carapp
+  namespace: argocd  # The namespace where ArgoCD is running
+spec:
+  destination:
+    server: https://kubernetes.default.svc  # Kubernetes API server (default cluster)
+    namespace: default  # Namespace where your app will be deployed
+  source:
+    repoURL: 'https://github.com/yourusername/your-repo'  # Your GitHub repo URL
+    targetRevision: HEAD  # You can set this to a specific branch or commit hash
+    path: helm-chart-folder  # Path to your Helm chart in the repo (relative path)
+    helm:
+      valueFiles:
+        - values.yaml  # Path to your values.yaml file inside the repo
+      releaseName: carapp  # Name of the Helm release
+  syncPolicy:
+    automated:
+      prune: true  # Automatically prune resources that are no longer defined
+      selfHeal: true  # Automatically correct out-of-sync resources
+    retry:
+      limit: 3  # Retry limit in case of sync failure
