@@ -1,4 +1,3 @@
-
 pipeline {
   agent {
     label "java"
@@ -138,4 +137,5 @@ pipeline {
      }
 
   }
+}
 }
