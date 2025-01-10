@@ -106,34 +106,34 @@ pipeline {
 		        if (tags && tags.size() > 0) {
 		            echo "Tags found: ${tags}"
 		
-		            // Sort the tags numerically
-		            tags = tags.sort { a, b ->
-		                def aParts = a.tokenize('.').collect { it.toInteger() }
-		                def bParts = b.tokenize('.').collect { it.toInteger() }
-		                aParts <=> bParts
-		            }
-		
-		            // Get the latest tag
-		            latestTag = tags.last()
-		            echo "Latest Tag: ${latestTag}"
-		
-		            // Increment the tag
-		            def versionParts = latestTag.tokenize('.')
-		            def major = versionParts[0].toInteger()
-		            def minor = versionParts[1].toInteger()
-		
-		            echo "Major: ${major}, Minor: ${minor}"
-		
-		            minor++ // Increment minor version
-		
-		            // If minor reaches 10, increment major and reset minor to 0
-		            if (minor == 10) {
-		                major++
-		                minor = 0
-		            }
-		
-		            // Set the new tag
-		            newTag = "${major}.${minor}"
+			// Sort the tags numerically
+			tags = tags.sort { a, b ->
+			    def aParts = a.tokenize('.').collect { it.toInteger() }
+			    def bParts = b.tokenize('.').collect { it.toInteger() }
+			    aParts <=> bParts
+			}
+			
+			// Get the latest tag
+			latestTag = tags.last()
+			echo "Latest Tag: ${latestTag}"
+			
+			// Increment the tag
+			def versionParts = latestTag.tokenize('.')
+			def major = versionParts[0].toInteger()
+			def minor = versionParts[1].toInteger()
+			
+			echo "Major: ${major}, Minor: ${minor}"
+			
+			minor++ // Increment minor version
+			
+			// If minor reaches 10, increment major and reset minor to 0
+			if (minor == 10) {
+			    major++
+			    minor = 0
+			}
+			
+			// Set the new tag
+			newTag = "${major}.${minor}"
 		        } else {
 		            echo "No tags found in the repository. Using default tag 0.1."
 		        }
