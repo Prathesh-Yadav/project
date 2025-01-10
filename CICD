@@ -80,7 +80,7 @@ pipeline {
 	    def dockerUsername = "admin"  // Your Nexus username
 	    def dockerPassword = "admin"  // Your Nexus password
 	
-	    stage('Determine Latest Tag') {
+	    stage('Build and Push Docker Image') {
 	        echo "Fetching existing tags from the repository..."
 	        // Fetch the list of tags from the Nexus repository
 	        def response = sh(
@@ -93,8 +93,8 @@ pipeline {
 	
 	        echo "Response from Nexus: ${response}"
 	
-	        def latestTag = "0.0" // Default tag (not used, but fallback)
-	        def newTag = "0.1" // Default tag when no tags exist
+	        def latestTag = "0.0" // Default tag (fallback)
+	        def newTag = "0.1"    // Default tag when no tags exist
 	
 	        if (response && response.contains('"tags"')) {
 	            def tagsJson = readJSON text: response
@@ -127,13 +127,12 @@ pipeline {
 	
 	        echo "New Tag to use: ${newTag}"
 	
-	        stage('Build and Push Docker Image') {
-	            echo "Building and pushing the Docker image with tag ${newTag}..."
-	            sh """
-	                docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
-	                docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
-	                docker push ${dockerRepoUrl}:${newTag}
-	            """
+	        echo "Building and pushing the Docker image with tag ${newTag}..."
+	        sh """
+	            docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
+	            docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
+	            docker push ${dockerRepoUrl}:${newTag}
+	        """
                 }
          }
      }
