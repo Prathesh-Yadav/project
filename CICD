@@ -117,19 +117,25 @@ pipeline {
 		        echo "Latest Tag: ${latestTag}"
 		
 		        // Increment the tag (insert your logic here)
-		        def versionParts = latestTag.tokenize('.')
-		        def major = versionParts[0].toInteger()
-		        def minor = versionParts[1].toInteger()
-		        minor++
-		
-		        // If minor reaches 10, increment major and reset minor to 0
-		        if (minor == 10) {
-		            major++
-		            minor = 0
-		        }
-		
-		        // Set the new tag
-		        newTag = "${major}.${minor}"
+			def versionParts = latestTag.tokenize('.')
+			def major = versionParts[0].toInteger()
+			def minor = versionParts[1].toInteger()
+			
+			echo "Major: ${major}, Minor: ${minor}"
+			
+			minor++
+			
+			echo "Incremented Minor: ${minor}"
+			
+			// If minor reaches 10, increment major and reset minor to 0
+			if (minor == 10) {
+			    major++
+			    minor = 0
+			}
+			
+			echo "Updated Major: ${major}, Updated Minor: ${minor}"
+			
+			newTag = "${major}.${minor}"
 		    } else {
 		        echo "No tags found in the repository. Using default tag 0.1."
 		    }
