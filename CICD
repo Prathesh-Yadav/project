@@ -92,8 +92,8 @@ pipeline {
 	
 	        echo "Response from Nexus: ${response}"
 	
-		def latestTag = "0.0" // Default tag (fallback)
-		def newTag = "0.1"    // Default tag when no tags exist
+		def latestTag = "0.9" // Default tag (fallback)
+		def newTag = "1.0"    // Default tag when no tags exist
 		
 		// Fetch tags from Nexus (or any artifact repository)
 		def nexusUrl = "http://13.233.77.239:5067/repository/carapp_docker/carapp/v2/tags/list"
