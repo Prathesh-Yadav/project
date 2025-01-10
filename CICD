@@ -145,11 +145,11 @@ pipeline {
 	            docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
 	            docker push ${dockerRepoUrl}:${newTag}
 	        """
-*/
+		*/
                 }
          }
      }
 
   }
 }
-}
+
