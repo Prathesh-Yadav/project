@@ -60,7 +60,7 @@ pipeline {
           ]], 
           credentialsId: 'nexus', 
           groupId: 'com.maven', 
-          nexusUrl: '43.205.214.232:8081/', 
+          nexusUrl: '13.233.77.239:8081/', 
           nexusVersion: 'nexus3', 
           protocol: 'http', 
           repository: 'carapp', 
@@ -78,7 +78,7 @@ pipeline {
                     // Define variables within the script block
                     def dockerImageName = "carapp"
                     def dockerTag = "1.0"
-                    def dockerRepoUrl = "43.205.214.232:5067/repository/carapp_docker/carapp"
+                    def dockerRepoUrl = "13.233.77.239:5067/repository/carapp_docker/carapp"
                     def dockerUsername = "admin"  // Your Nexus username
                     def dockerPassword = "admin"  // Your Nexus password
 
