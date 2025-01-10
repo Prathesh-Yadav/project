@@ -81,69 +81,67 @@ pipeline {
 	    def dockerPassword = "admin"  // Your Nexus password
 	
 	    stage('Build and Push Docker Image') {
-	        echo "Fetching existing tags from the repository..."
-	        // Fetch the list of tags from the Nexus repository
-	        def response = sh(
-	            script: """
-	                curl -u ${dockerUsername}:${dockerPassword} -s \
-	                ${dockerRepoUrl}/v2/carapp/tags/list
-	            """,
-	            returnStdout: true
-	        ).trim()
-	
-	        echo "Response from Nexus: ${response}"
-	
-		def latestTag = "0.9" // Default tag (fallback)
-		def newTag = "1.0"    // Default tag when no tags exist
+		    echo "Fetching existing tags from the repository..."
+		    // Fetch the list of tags from the Nexus repository
+		    def response = sh(
+		        script: """
+		            curl -u ${dockerUsername}:${dockerPassword} -s \
+		            ${dockerRepoUrl}/v2/carapp/tags/list
+		        """,
+		        returnStdout: true
+		    ).trim()
 		
-		// Fetch tags from Nexus (or any artifact repository)
-		def nexusUrl = "http://13.233.77.239:5067/repository/carapp_docker/carapp/v2/tags/list"
-		def nexusResponse = sh(script: "curl -u admin:admin -s ${nexusUrl}", returnStdout: true).trim()
+		    echo "Response from Nexus: ${response}"
 		
-		if (nexusResponse && nexusResponse.contains('"tags"')) {
-		    def tagsJson = readJSON text: nexusResponse
-		    def tags = tagsJson.tags
-		    if (tags && tags.size() > 0) {
-		        echo "Tags found: ${tags}"
-		        
-		        // Sort the tags numerically
-		        tags = tags.sort { a, b ->
-		            def aParts = a.tokenize('.').collect { it.toInteger() }
-		            def bParts = b.tokenize('.').collect { it.toInteger() }
-		            aParts <=> bParts
+		    def latestTag = "0.0" // Default tag (fallback) in case no tags are found
+		    def newTag = "1.0"    // Default tag when no tags exist
+		
+		    // Fetch tags from Nexus (or any artifact repository)
+		    def nexusUrl = "http://13.233.77.239:5067/repository/carapp_docker/carapp/v2/tags/list"
+		    def nexusResponse = sh(script: "curl -u ${dockerUsername}:${dockerPassword} -s ${nexusUrl}", returnStdout: true).trim()
+		
+		    if (nexusResponse && nexusResponse.contains('"tags"')) {
+		        def tagsJson = readJSON text: nexusResponse
+		        def tags = tagsJson.tags
+		        if (tags && tags.size() > 0) {
+		            echo "Tags found: ${tags}"
+		
+		            // Sort the tags numerically
+		            tags = tags.sort { a, b ->
+		                def aParts = a.tokenize('.').collect { it.toInteger() }
+		                def bParts = b.tokenize('.').collect { it.toInteger() }
+		                aParts <=> bParts
+		            }
+		
+		            // Get the latest tag
+		            latestTag = tags.last()
+		            echo "Latest Tag: ${latestTag}"
+		
+		            // Increment the tag
+		            def versionParts = latestTag.tokenize('.')
+		            def major = versionParts[0].toInteger()
+		            def minor = versionParts[1].toInteger()
+		
+		            echo "Major: ${major}, Minor: ${minor}"
+		
+		            minor++ // Increment minor version
+		
+		            // If minor reaches 10, increment major and reset minor to 0
+		            if (minor == 10) {
+		                major++
+		                minor = 0
+		            }
+		
+		            // Set the new tag
+		            newTag = "${major}.${minor}"
+		        } else {
+		            echo "No tags found in the repository. Using default tag 0.1."
 		        }
-		
-		        latestTag = tags.last() // Get the latest tag
-		        echo "Latest Tag: ${latestTag}"
-		
-		        // Increment the tag (insert your logic here)
-			def versionParts = latestTag.tokenize('.')
-			def major = versionParts[0].toInteger()
-			def minor = versionParts[1].toInteger()
-			
-			echo "Major: ${major}, Minor: ${minor}"
-			
-			minor++
-			
-			echo "Incremented Minor: ${minor}"
-			
-			// If minor reaches 10, increment major and reset minor to 0
-			if (minor == 10) {
-			    major++
-			    minor = 0
-			}
-			
-			echo "Updated Major: ${major}, Updated Minor: ${minor}"
-			
-			newTag = "${major}.${minor}"
 		    } else {
-		        echo "No tags found in the repository. Using default tag 0.1."
+		        echo "Error fetching tags from Nexus."
 		    }
-		} else {
-		    echo "Error fetching tags from Nexus."
-		}
 		
-		echo "New Tag to use: ${newTag}"
+		    echo "New Tag to use: ${newTag}"
 	        echo "Building and pushing the Docker image with tag ${newTag}..."
 	        sh """
 	            docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
