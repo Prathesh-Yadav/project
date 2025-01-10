@@ -126,11 +126,6 @@ pipeline {
 		
 		echo "New Tag to use: ${newTag}"
 		
-		// Push the new tag to the Nexus repository
-		sh """
-		    git tag ${newTag}
-		    git push origin ${newTag}
-		"""
 	        echo "Building and pushing the Docker image with tag ${newTag}..."
 	        sh """
 	            docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
