@@ -97,10 +97,10 @@ pipeline {
 		
 		// Fetch tags from Nexus (or any artifact repository)
 		def nexusUrl = "http://13.233.77.239:5067/repository/carapp_docker/carapp/v2/tags/list"
-		def response = sh(script: "curl -u admin:admin -s ${nexusUrl}", returnStdout: true).trim()
+		def nexusResponse = sh(script: "curl -u admin:admin -s ${nexusUrl}", returnStdout: true).trim()
 		
-		if (response && response.contains('"tags"')) {
-		    def tagsJson = readJSON text: response
+		if (nexusResponse && nexusResponse.contains('"tags"')) {
+		    def tagsJson = readJSON text: nexusResponse
 		    def tags = tagsJson.tags
 		    if (tags && tags.size() > 0) {
 		        echo "Tags found: ${tags}"
