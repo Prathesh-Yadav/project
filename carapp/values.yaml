@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: 52.66.116.134:5000/mercedezcar/mercedez
+  repository: 13.233.77.239:5067/repository/carapp_docker/carapp
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.1"
+  tag: "1.0"
 
 imagePullSecrets: 
   - name: nexus-secret
