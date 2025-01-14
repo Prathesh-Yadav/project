@@ -1,0 +1,171 @@
+def COLOR_MAO = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
+]
+
+pipeline {
+  agent {
+    label "java"
+  }
+  environment {
+    PATH = "/apache-maven-3.9.9/bin:/usr/bin:/bin:/usr/local/bin"
+	}
+
+  stages {
+    stage('Build') {
+      steps {
+        sh 'mvn clean install'
+      }
+    }
+
+    stage('jacoco') {
+      steps {
+        jacoco()
+      }
+    }
+    
+    stage('SonarQube analysis') {
+      steps {
+        script {
+          def scannerHome = tool 'scanner_sonar'
+          withSonarQubeEnv('jenkins-sonar') {
+            sh """
+              ${scannerHome}/bin/sonar-scanner \
+              -Dsonar.projectKey=javawebapp \
+              -Dsonar.projectName=javawebapp \
+              -Dsonar.projectVersion=1.0 \
+              -Dsonar.java.binaries='target/classes'
+            """
+          }
+        }
+      }
+    }
+    /*
+    stage("Sonar Quality Gate Check") {
+      steps {
+        timeout(time: 1, unit: 'HOURS') {
+          script {
+            def qualityGate = waitForQualityGate()
+            if (qualityGate.status != 'OK') {
+              error "Pipeline aborted due to quality gate failure: ${qualityGate.status}"
+            }
+          }
+        }
+      }
+    }
+    */
+    stage('Upload to Nexus') {
+      steps {
+        nexusArtifactUploader(
+          artifacts: [[
+            artifactId: 'SimpleWebApplication', 
+            classifier: '', 
+            file: 'target/SimpleWebApplication.war', 
+            type: 'war'
+          ]], 
+          credentialsId: 'nexus', 
+          groupId: 'com.maven', 
+          nexusUrl: '13.233.77.239:8081/', 
+          nexusVersion: 'nexus3', 
+          protocol: 'http', 
+          repository: 'carapp', 
+          version: '1.0.0-SNAPSHOT'
+        )
+      }
+    }
+
+  stage('Download Latest WAR from Nexus, Build image and push back to nexus') {
+    agent {
+        label "docker"
+    }
+    steps {
+	script {
+	    def dockerImageName = "carapp"
+	    def dockerRepoUrl = "13.233.77.239:5067/repository/carapp_docker/carapp"
+	    def dockerUsername = "admin"  // Your Nexus username
+	    def dockerPassword = "admin"  // Your Nexus password
+	
+	    stage('Build and Push Docker Image') {
+		    echo "Fetching existing tags from the repository..."
+		    // Fetch the list of tags from the Nexus repository
+		    def response = sh(
+		        script: """
+		            curl -u ${dockerUsername}:${dockerPassword} -s \
+		            ${dockerRepoUrl}/v2/carapp/tags/list
+		        """,
+		        returnStdout: true
+		    ).trim()
+		
+		    echo "Response from Nexus: ${response}"
+		
+		    def latestTag = "0.0" // Default tag (fallback) in case no tags are found
+		    def newTag = "1.0"    // Default tag when no tags exist
+		
+		    // Fetch tags from Nexus (or any artifact repository)
+		    def nexusUrl = "http://13.233.77.239:5067/repository/carapp_docker/carapp/v2/tags/list"
+		    def nexusResponse = sh(script: "curl -u ${dockerUsername}:${dockerPassword} -s ${nexusUrl}", returnStdout: true).trim()
+		
+		    if (nexusResponse && nexusResponse.contains('"tags"')) {
+		        def tagsJson = readJSON text: nexusResponse
+		        def tags = tagsJson.tags
+		        if (tags && tags.size() > 0) {
+		            echo "Tags found: ${tags}"
+		
+			// Sort the tags numerically
+			tags = tags.sort { a, b ->
+			    def aParts = a.tokenize('.').collect { it.toInteger() }
+			    def bParts = b.tokenize('.').collect { it.toInteger() }
+			    aParts <=> bParts
+			}
+			
+			// Get the latest tag
+			latestTag = tags.last()
+			echo "Latest Tag: ${latestTag}"
+			
+			// Increment the tag
+			def versionParts = latestTag.tokenize('.')
+			def major = versionParts[0].toInteger()
+			def minor = versionParts[1].toInteger()
+			
+			echo "Major: ${major}, Minor: ${minor}"
+			
+			minor++ // Increment minor version
+			
+			// If minor reaches 10, increment major and reset minor to 0
+			if (minor == 10) {
+			    major++
+			    minor = 0
+			}
+			
+			// Set the new tag
+			newTag = "${major}.${minor}"
+		        } else {
+		            echo "No tags found in the repository. Using default tag 0.1."
+		        }
+		    } else {
+		        echo "Error fetching tags from Nexus."
+		    }
+		
+		    echo "New Tag to use: ${newTag}"
+	        echo "Building and pushing the Docker image with tag ${newTag}..."
+	        sh """
+	            docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
+	            docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
+	            docker push ${dockerRepoUrl}:${newTag}
+	        """
+		
+                }
+         }
+     }
+
+  }
+  post{
+      always {
+            echo 'Slack Notifications.'
+            slacksend channel: '#carapp'
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "${currentBuild.currentResult}:* Job${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+                }
+              }
+}
+}
