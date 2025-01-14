@@ -1,0 +1,105 @@
+---
+# Create nexus user
+- name: Create nexus user
+  ansible.builtin.user:
+    name: nexususer
+    state: present
+    shell: /bin/bash
+  become: yes
+
+# Install Java 17 (Amazon Corretto)
+- name: Install Java 17 (Amazon Corretto)
+  ansible.builtin.yum:
+    name: java-17-amazon-corretto-devel
+    state: present
+  become: yes
+
+# Ensure /home/nexususer directory is writable
+- name: Ensure /home/nexususer directory is writable
+  ansible.builtin.file:
+    path: /home/nexususer
+    state: directory
+    owner: nexususer
+    group: nexususer
+    mode: '0777'
+  become: yes
+
+# Verify directory ownership and permissions
+- name: Verify directory ownership and permissions
+  ansible.builtin.command:
+    cmd: ls -ld /home/nexususer
+  register: dir_info
+  become: yes
+
+- name: Debug directory ownership
+  ansible.builtin.debug:
+    var: dir_info.stdout_lines
+
+# Download Nexus tar.gz file
+- name: Download Nexus tar.gz file
+  ansible.builtin.get_url:
+    url: https://download.sonatype.com/nexus/3/nexus-3.72.0-04-unix.tar.gz
+    dest: /home/nexususer/nexus-3.72.0-04-unix.tar.gz
+    mode: '0777'
+  become: yes
+
+# Extract Nexus tar.gz
+- name: Extract Nexus tar.gz
+  ansible.builtin.unarchive:
+    src: /home/nexususer/nexus-3.72.0-04-unix.tar.gz
+    dest: /home/nexususer/
+    remote_src: yes
+  become: yes
+
+# Set permissions for Nexus
+- name: Set permissions for Nexus
+  ansible.builtin.file:
+    path: "/home/nexususer/nexus-3.72.0-04"
+    owner: nexususer
+    group: nexususer
+    mode: '0777'
+    recurse: yes
+  become: yes
+
+# Create Nexus start script
+- name: Create Nexus start script
+  ansible.builtin.copy:
+    content: |
+      #!/bin/bash
+      /home/nexususer/nexus-3.72.0-04/bin/nexus start
+    dest: /home/nexususer/nexus_start.sh
+    mode: '0777'
+    owner: nexususer
+    group: nexususer
+  become: yes
+
+# Create Nexus status script
+- name: Create Nexus status script
+  ansible.builtin.copy:
+    content: |
+      #!/bin/bash
+      /home/nexususer/nexus-3.72.0-04/bin/nexus status
+    dest: /home/nexususer/nexus_status.sh
+    mode: '0777'
+    owner: nexususer
+    group: nexususer
+  become: yes
+
+# Start Nexus
+- name: Start Nexus
+  ansible.builtin.command:
+    cmd: /home/nexususer/nexus_start.sh
+  become: yes
+
+# Check Nexus status
+- name: Check Nexus status
+  ansible.builtin.command:
+    cmd: /home/nexususer/nexus_status.sh
+  register: nexus_status
+  failed_when: "'running' not in nexus_status.stdout"
+
+# Display Nexus status
+- name: Display Nexus status
+  ansible.builtin.debug:
+    msg: "Nexus status: {{ nexus_status.stdout }}"
+

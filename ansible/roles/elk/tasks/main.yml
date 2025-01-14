@@ -1,0 +1,89 @@
+---
+- name: Create Elasticsearch ConfigMap
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'elasticsearch-config.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Deploy Elasticsearch Deployment
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'elasticsearch-deployment.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Create Elasticsearch Service
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'elasticsearch-service.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Create Kibana ConfigMap
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'kibana-config.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Deploy Kibana Deployment
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'kibana-deployment.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Create Kibana Service
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'kibana-service.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Create Logstash ConfigMap
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'logstash-config.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Deploy Logstash Deployment
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'logstash-deployment.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Create Logstash Service
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'logstash-service.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Create Filebeat ConfigMap
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'filebeat-config.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Deploy Filebeat Deployment
+  kubernetes.core.k8s:
+    kubeconfig: "/etc/kubernetes/admin.conf"
+    state: present
+    definition: "{{ lookup('template', 'filebeat-deployment.yaml.j2') }}"
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"
+

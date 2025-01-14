@@ -1,0 +1,57 @@
+---
+# Tasks to install Maven globally
+
+- name: Ensure /opt directory is writable
+  ansible.builtin.file:
+    path: /opt
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+
+- name: Download Maven
+  ansible.builtin.get_url:
+    url: https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
+    dest: /opt/apache-maven-3.9.9-bin.tar.gz
+    mode: '0755'
+  become: yes
+
+- name: Extract Maven
+  ansible.builtin.unarchive:
+    src: /opt/apache-maven-3.9.9-bin.tar.gz
+    dest: /opt/
+    remote_src: yes
+  become: yes
+
+- name: Remove Maven zip file
+  ansible.builtin.file:
+    path: /opt/apache-maven-3.9.9-bin.tar.gz
+    state: absent
+  become: yes
+
+- name: Ensure /etc/profile.d exists
+  ansible.builtin.file:
+    path: /etc/profile.d
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+
+- name: Create Maven PATH script
+  ansible.builtin.copy:
+    dest: /etc/profile.d/maven.sh
+    content: |
+      export PATH=$PATH:/opt/apache-maven-3.9.9/bin
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+
+- name: Source profile to apply PATH changes
+  ansible.builtin.shell: "source /etc/profile"
+  args:
+    executable: /bin/bash
+  become: yes
+

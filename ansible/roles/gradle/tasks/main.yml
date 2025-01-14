@@ -1,0 +1,65 @@
+---
+#Basic is to install java
+- name: Install Java
+  shell: sudo yum install java-17-amazon-corretto-devel -y
+  become: yes
+
+- name: Verify java installation
+  command: java -version
+  register: java_output
+
+- name: debug java version
+  debug:
+    msg: "{{ java_output.stdout }}"
+
+# install gardle
+
+- name: Create Gradle Directory
+  file:
+    path: /opt/gradle
+    state: directory
+    mode: '755'
+  become: yes
+
+- name: Download Gradle
+  ansible.builtin.get_url:
+    url: https://services.gradle.org/distributions/gradle-8.3-bin.zip
+    dest: /tmp/gradle-8.3-bin.zip
+    mode: '755'
+
+- name: unzip
+  unarchive:
+    src: /tmp/gradle-8.3-bin.zip
+    dest: /opt/gradle
+    remote_src: yes
+  become: yes
+
+- name: delete the zip file
+  file:
+    path: /tmp/gradle-8.3-bin.zip
+    state: absent
+  become: yes
+
+
+#configure the profile
+- name: Create Gradle Environment Variables
+  ansible.builtin.copy:
+    dest: /etc/profile.d/gradle.sh
+    content: |
+      export GRADLE_HOME=/opt/gradle/gradle-8.3
+      export PATH=$GRADLE_HOME/bin:$PATH
+    mode: '755'
+  become: yes
+  become_user: root
+
+#- name: source/reload the script
+  #shell: source /etc/profile.d/gradle.sh
+
+#- name: Verify gradle installation
+  #command: gradle -version
+  #register: gardle_output
+  #become: yes
+
+#- name: debug gradle version
+  #debug:
+    #msg: "{{ gradle_output.stdout }}"

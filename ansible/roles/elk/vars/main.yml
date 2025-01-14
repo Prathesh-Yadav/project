@@ -1,0 +1,19 @@
+---
+namespace: "argocd"
+
+# Elasticsearch variables
+elasticsearch_image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.0"
+elasticsearch_port: 9200
+
+# Kibana variables
+kibana_image: "docker.elastic.co/kibana/kibana:7.17.0"
+kibana_port: 5601
+
+# Logstash variables
+logstash_image: "docker.elastic.co/logstash/logstash:7.17.0"
+logstash_port: 5044
+
+# Filebeat variables
+filebeat_image: "docker.elastic.co/beats/filebeat:7.17.0"
+
+

@@ -1,0 +1,26 @@
+---
+# roles/tasks/main.yml
+
+- name: Add Grafana Helm repo
+  become: true  # Ensure task runs as root
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+
+- name: Install Grafana using Helm
+  become: true
+  kubernetes.core.helm:
+    name: grafana-new
+    chart_ref: grafana/grafana
+    state: present
+    namespace: argocd
+    values:
+      service:
+        type: NodePort
+        ports:
+          - name: http
+            port: 80
+            targetPort: 3000
+            nodePort: 30091
+      adminPassword: 'admin'  # Set Grafana admin password (can be customized)
+

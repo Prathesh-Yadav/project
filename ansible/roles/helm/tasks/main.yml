@@ -1,0 +1,48 @@
+---
+- name: Install Helm
+  become: yes
+  apt:
+    name: curl
+    state: present
+    update_cache: yes
+
+- name: Download Helm binary
+  become: yes
+  get_url:
+    url: "https://get.helm.sh/helm-v3.16.4-linux-amd64.tar.gz"
+    dest: "/tmp/helm-v3.16.4-linux-amd64.tar.gz"
+
+- name: Extract Helm binary
+  become: yes
+  unarchive:
+    src: "/tmp/helm-v3.16.4-linux-amd64.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+
+- name: Move Helm binary to /usr/local/bin
+  become: yes
+  command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+
+- name: Clean up Helm archive and extracted files
+  become: yes
+  file:
+    path: "/tmp/helm-v3.16.4-linux-amd64.tar.gz"
+    state: absent
+
+- name: Ensure kubectl context is set
+  command: kubectl config use-context my-cluster-context
+  ignore_errors: yes  # Ignore errors in case the context doesn't exist yet
+
+- name: Set kubectl context to argocd namespace
+  command: kubectl config set-context --current --namespace=argocd
+  when: ansible_facts['distribution'] == "Ubuntu"  # Ensure kubectl is available on the target node
+
+- name: Verify Helm installation
+  command: helm version
+  register: helm_version
+  changed_when: false
+
+- name: Display Helm version
+  debug:
+    var: helm_version.stdout
+

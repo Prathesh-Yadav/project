@@ -1,0 +1,60 @@
+---
+# tasks file for junit_jacoco
+
+- name: Debug install_dir variable
+  debug:
+    msg: "The install directory is {{ install_dir }}"
+
+- name: Creating the directory
+  ansible.builtin.file:
+    path: "{{ install_dir }}"
+    state: directory
+    mode: '755'
+    owner: root
+    group: root
+  become: yes
+
+- name: Download Junit
+  ansible.builtin.get_url:
+    url: "{{ junit_url }}"
+    dest: "{{ install_dir }}/junit-{{ junit_version }}.jar"
+    mode: '644'
+  become: yes
+
+# Download the Hamcrest as it is the dependency for Junit
+- name: Download Hamcrest
+  ansible.builtin.get_url:
+    url: "{{ hamcrest_url }}"
+    dest: "{{ install_dir }}/hamcrest-core-{{ hamcrest_version }}.jar"
+    mode: '644'
+  become: yes
+
+- name: Download JaCoCo
+  ansible.builtin.get_url:
+    url: "{{ jacoco_url }}"
+    dest: "/tmp/jacoco.zip"
+    mode: '644'
+  become: yes
+
+- name: Create JaCoCo extraction directory
+  ansible.builtin.file:
+    path: "{{ install_dir }}/jacoco"
+    state: directory
+    mode: '755'
+    owner: root
+    group: root
+  become: yes
+
+- name: Extract JaCoCo
+  ansible.builtin.unarchive:
+    src: /tmp/jacoco.zip
+    dest: "{{ install_dir }}/jacoco"
+    remote_src: yes
+  become: yes
+
+- name: Remove JaCoCo zip file
+  ansible.builtin.file:
+    path: /tmp/jacoco.zip
+    state: absent
+  become: yes
+

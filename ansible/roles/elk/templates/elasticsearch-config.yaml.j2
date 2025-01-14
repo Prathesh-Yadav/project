@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+  namespace: {{ namespace }}
+data:
+  elasticsearch.yml: |
+    network.host: 0.0.0.0
+    http.port: {{ elasticsearch_port }}
+

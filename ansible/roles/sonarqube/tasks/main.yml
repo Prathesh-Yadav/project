@@ -1,0 +1,44 @@
+---
+# Step 1: Create SonarQube User
+- name: Create sonarqube user
+  ansible.builtin.user:
+    name: sonarqube
+    state: present
+    shell: /bin/bash
+  become: yes
+
+# Step 2: Download the SonarQube zip package
+- name: Download SonarQube zip file
+  ansible.builtin.get_url:
+    url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.1.0.47736.zip
+    dest: /home/sonarqube/sonarqube-9.1.0.47736.zip
+  become: yes
+
+# Step 3: Unzip the SonarQube package
+- name: Unzip SonarQube package
+  ansible.builtin.unarchive:
+    src: /home/sonarqube/sonarqube-9.1.0.47736.zip
+    dest: /home/sonarqube
+    remote_src: yes
+    mode: '0755'
+    owner: sonarqube
+    group: sonarqube
+  become: yes
+
+# Step 4: Remove the zip file after extraction
+- name: Remove SonarQube zip file
+  ansible.builtin.file:
+    path: /home/sonarqube/sonarqube-9.1.0.47736.zip
+    state: absent
+  become: yes
+
+# Step 5: Start SonarQube from the bin folder
+- name: Start SonarQube
+  ansible.builtin.shell: |
+    cd /home/sonarqube/sonarqube-9.1.0.47736/bin/linux-x86-64
+    ./sonar.sh start
+  args:
+    chdir: /home/sonarqube/sonarqube-9.1.0.47736/bin/linux-x86-64
+  become: yes
+  become_user: sonarqube
+

@@ -1,0 +1,107 @@
+---
+- name: Install Tomcat
+# Create Tomcat user
+  ansible.builtin.user:
+    name: tomcatuser
+    state: present
+    shell: /bin/bash
+  become: yes
+
+# Download the Tomcat zip file
+- name: Download Tomcat
+  ansible.builtin.get_url:
+    url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.34/bin/apache-tomcat-10.1.34.zip
+    dest: /home/tomcatuser/apache-tomcat-10.1.34.zip
+    mode: '0777'
+    owner: tomcatuser
+    group: tomcatuser
+  become: yes
+
+# Unarchive the Tomcat archive
+- name: Extract Tomcat
+  ansible.builtin.unarchive:
+    src: /home/tomcatuser/apache-tomcat-10.1.34.zip
+    dest: /home/tomcatuser/
+    remote_src: yes
+    owner: tomcatuser
+    group: tomcatuser
+  become: yes
+
+# Remove the zip file
+- name: Remove Tomcat zip file
+  ansible.builtin.file:
+    path: /home/tomcatuser/apache-tomcat-10.1.34.zip
+    state: absent
+  become: yes
+
+# Set permissions for Tomcat directory
+- name: Set permissions for Tomcat directory
+  ansible.builtin.file:
+    path: /home/tomcatuser/apache-tomcat-10.1.34
+    state: directory
+    mode: '0755'
+    owner: tomcatuser
+    group: tomcatuser
+    recurse: yes
+  become: yes
+
+# copy the server.xml files to tomcat user
+- name: copy the server.xml file
+  ansible.builtin.copy:
+    src: /etc/ansible/server.xml
+    dest: /home/tomcatuser/apache-tomcat-10.1.34/conf
+    owner: tomcatuser
+    group: tomcatuser
+    mode: '0777'
+  become: yes
+
+# copy the tomcat-users.xml files to tomcat user
+- name: copy the tomcat-users.xml file
+  ansible.builtin.copy:
+    src: /etc/ansible/tomcat-users.xml
+    dest: /home/tomcatuser/apache-tomcat-10.1.34/conf/tomcat-users.xml
+    owner: tomcatuser
+    group: tomcatuser
+    mode: '0777'
+  become: yes
+
+# copy the context.xml files to tomcat user
+- name: copy the context.xml file
+  ansible.builtin.copy:
+    src: /etc/ansible/context.xml
+    dest: /home/tomcatuser/apache-tomcat-10.1.34/webapps/manager/META-INF/context.xml
+    owner: tomcatuser
+    group: tomcatuser
+    mode: '0777'
+  become: yes
+
+# copy the tomcatunit file to tomcat user
+- name: copy the unitfile
+  ansible.builtin.copy:
+    src: /etc/ansible/tomcat.service
+    dest: /etc/systemd/system/tomcat.service
+    owner: tomcatuser
+    group: tomcatuser
+    mode: '0777'
+  become: yes
+
+# deamon_reload for tomcat service
+- name: restart the configuration file
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+
+# enable the service
+- name: enable the service
+  ansible.builtin.service:
+    name: tomcat
+    enabled: yes
+  become: yes
+
+# start the service
+- name: start the service
+  ansible.builtin.service:
+    name: tomcat
+    state: started
+    enabled: yes
+  become: yes

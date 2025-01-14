@@ -1,0 +1,29 @@
+---
+# roles/prometheus/main.yml
+
+- name: Add Prometheus Helm repo
+  become: true  # Ensure task runs as root
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: Install Prometheus using Helm
+  become: true
+  kubernetes.core.helm:
+    name: prometheus-new  # Changed the release name
+    chart_ref: prometheus-community/kube-prometheus-stack
+    state: present
+    namespace: argocd
+    values:
+      prometheus:
+        replicaCount: 1
+        service:
+          type: NodePort
+          ports:
+            - name: http
+              port: 9090
+              targetPort: 9090
+              nodePort: 30090
+      alertmanager:
+        enabled: false
+

@@ -1,0 +1,72 @@
+---
+- name: Install ArgoCD using Helm
+  kubernetes.core.k8s:
+    kubeconfig: /etc/kubernetes/admin.conf
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: argocd
+  become: yes
+
+- name: Add the Argo Helm repository
+  command:
+    cmd: helm repo add argo https://argoproj.github.io/argo-helm
+    creates: /root/.cache/helm/repository/argo-index.yaml
+  become: yes
+
+- name: Update Helm repositories
+  command:
+    cmd: helm repo update
+  become: yes
+
+- name: Install ArgoCD using Helm
+  command:
+    cmd: helm install argocd argo/argo-cd --namespace argocd
+  become: yes
+
+- name: Wait for ArgoCD pods to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/kubernetes/admin.conf
+    kind: Pod
+    namespace: argocd
+  register: argocd_pods
+  until: "{{ argocd_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length == argocd_pods.resources | length }}"
+  retries: 10
+  delay: 15
+  become: yes
+
+- name: Change ArgoCD server service type to NodePort
+  kubernetes.core.k8s:
+    kubeconfig: /etc/kubernetes/admin.conf
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: argocd-server
+        namespace: argocd
+      spec:
+        type: NodePort
+        selector:
+          app.kubernetes.io/name: argocd-server
+        ports:
+          - name: http
+            port: 80
+            targetPort: 8080
+            nodePort: 30007
+          - name: https
+            port: 443
+            targetPort: 8083
+            nodePort: 30008
+  become: yes
+
+- name: Get ArgoCD initial admin password
+  command:
+    cmd: "kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 --decode"
+  register: argocd_admin_password
+  become: yes
+
+- name: Show ArgoCD initial admin password
+  debug:
+    msg: "ArgoCD initial admin password is {{ argocd_admin_password.stdout }}"
+

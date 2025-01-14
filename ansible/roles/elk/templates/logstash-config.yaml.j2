@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: {{ namespace }}
+data:
+  logstash.conf: |
+    input {
+      beats {
+        port => {{ logstash_port }}
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch-service.{{ namespace }}.svc.cluster.local:{{ elasticsearch_port }}"]
+        index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+      }
+    }
+
