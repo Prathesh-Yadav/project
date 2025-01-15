@@ -21,5 +21,5 @@ RUN LATEST_VERSION=$(curl -s -u admin:admin http://13.233.77.239:8081/repository
 RUN chmod -R 777 /home/tomcat
 RUN chown -R tomcat:tomcat /home/tomcat
 USER tomcat
-EXPOSE 8080
+EXPOSE 8082
 CMD ["/home/tomcat/apache-tomcat-10.1.34/bin/catalina.sh", "run"]
