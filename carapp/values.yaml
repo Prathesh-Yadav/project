@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: 13.233.77.239:5001/repository/benzcarweb/benzcarpage
+  repository: http://15.206.171.203:8081/repository/carapp_docker/carapp
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.1"
+  tag: "1.0"
 
 imagePullSecrets: 
   - name: nexus-secret
@@ -39,7 +39,7 @@ securityContext: {}
 
 service:
   type: NodePort
-  port: 8080
+  port: 8082
   nodePort: 30080
 
 ingress:
