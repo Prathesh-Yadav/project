@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: repository/carapp_docker/carapp
+  repository: carapp_docker/carapp
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "1.0"
