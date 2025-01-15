@@ -130,18 +130,18 @@ version = 2
 
       [plugins."io.containerd.grpc.v1.cri".registry.auths]
 
-      [plugins."io.containerd.grpc.v1.cri".registry.configs."13.233.77.239:5001".tls]
+      [plugins."io.containerd.grpc.v1.cri".registry.configs."15.206.171.203:5067".tls]
         insecure_skip_verify = true
 
-      [plugins."io.containerd.grpc.v1.cri".registry.configs."13.233.77.239:5001".http]
+      [plugins."io.containerd.grpc.v1.cri".registry.configs."15.206.171.203:5067".http]
         tls = false
-      [plugins."io.containerd.grpc.v1.cri".registry.configs."13.233.77.239:5001".auth]
+      [plugins."io.containerd.grpc.v1.cri".registry.configs."15.206.171.203:5067".auth]
         auth = "YWRtaW46YWRtaW4="
 
       [plugins."io.containerd.grpc.v1.cri".registry.headers]
 
-      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."13.233.77.239:5001"]
-        endpoint = ["http://13.233.77.239:5001"]
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."15.206.171.203:5067"]
+        endpoint = ["http://15.206.171.203:5067"]
 
     [plugins."io.containerd.grpc.v1.cri".x509_key_pair_streaming]
       tls_cert_file = ""
