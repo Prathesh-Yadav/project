@@ -142,8 +142,9 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
             
             echo "New Tag to use: ${newTag}"
             echo "Building and pushing the Docker image with tag ${newTag}..."
-            
+            withCredentials([usernamePassword(credentialsId: 'nexus-docker', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
             sh """
+		docker login ${dockerRepoUrl} -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
                 docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
                 docker tag ${dockerImageName}:${newTag} ${dockerRepoUrl}:${newTag}
                 docker push ${dockerRepoUrl}:${newTag}
@@ -151,7 +152,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
         }
     }
 }
-
+}
 
   }
 }
