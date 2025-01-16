@@ -60,7 +60,7 @@ pipeline {
           ]], 
           credentialsId: 'nexus', 
           groupId: 'com.maven', 
-          nexusUrl: '13.233.77.239:8081/', 
+          nexusUrl: '13.233.8.58:8081/', 
           nexusVersion: 'nexus3', 
           protocol: 'http', 
           repository: 'carapp', 
@@ -76,7 +76,7 @@ pipeline {
     steps {
 	script {
 	    def dockerImageName = "carapp"
-	    def dockerRepoUrl = "13.233.77.239:5067/repository/carapp_docker/carapp"
+	    def dockerRepoUrl = "13.233.8.58:5067/repository/carapp_docker/carapp"
 	    def dockerUsername = "admin"  // Your Nexus username
 	    def dockerPassword = "admin"  // Your Nexus password
 	
@@ -97,7 +97,7 @@ pipeline {
 		    def newTag = "1.0"    // Default tag when no tags exist
 		
 		    // Fetch tags from Nexus (or any artifact repository)
-		    def nexusUrl = "http://13.233.77.239:5067/repository/carapp_docker/carapp/v2/tags/list"
+		    def nexusUrl = "http://13.233.8.58:5067/repository/carapp_docker/carapp/v2/tags/list"
 		    def nexusResponse = sh(script: "curl -u ${dockerUsername}:${dockerPassword} -s ${nexusUrl}", returnStdout: true).trim()
 		
 		    if (nexusResponse && nexusResponse.contains('"tags"')) {
