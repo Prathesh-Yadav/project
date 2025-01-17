@@ -34,5 +34,5 @@ NEW_VERSION="$MAJOR.$MINOR"
 # Update the version file
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Output only the version (no extra text)
-echo "$NEW_VERSION"
+# Display the new version
+echo "Updated version: $NEW_VERSION"
