@@ -95,14 +95,10 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			def newTag = ""
 			
 			// Fetch tags from Nexus using curl
-			// Fetch tags from Nexus using curl
 			def response = sh(
 			    script: "curl -u ${dockerUsername}:${dockerPassword} -s ${dockerRepoUrl}",
 			    returnStdout: true
 			).trim()
-			
-			// Print the raw response for debugging
-			//echo "Response from Nexus: ${response}"
 			
 			// Parse the response as JSON and extract tags
 			def jsonResponse = readJSON text: response
@@ -121,30 +117,27 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			    def latestTag = tags.sort { a, b ->
 			        def aParts = a.split('\\.')
 			        def bParts = b.split('\\.')
-			        
-			        // Ensure both tags have at least 3 parts for comparison
-			        if (aParts.size() < 3 || bParts.size() < 3) {
-			            echo "Skipping invalid tag comparison: a=${a}, b=${b}"
+			
+			        // Ensure both tags have at least 2 parts for comparison
+			        if (aParts.size() < 2 || bParts.size() < 2) {
 			            return 0 // Skip invalid tags
 			        }
-			        
-			        return [aParts[0].toInteger(), aParts[1].toInteger(), aParts[2].toFloat()] <=> 
-			               [bParts[0].toInteger(), bParts[1].toInteger(), bParts[2].toFloat()]
+			
+			        return [aParts[0].toInteger(), aParts[1].toInteger()] <=> 
+			               [bParts[0].toInteger(), bParts[1].toInteger()]
 			    }.last()
 			
-			    // Split the latest tag into parts and increment the decimal value
+			    // Split the latest tag into parts and increment the minor version
 			    def parts = latestTag.split('\\.')
-			    if (parts.size() == 3) { // Ensure tag has exactly three parts
+			    if (parts.size() == 2) { // Ensure tag has exactly two parts
 			        def major = parts[0].toInteger()
 			        def minor = parts[1].toInteger()
-			        def patch = parts[2].toFloat()
 			
-			        // Increment the patch version by 0.1
-			        patch += 0.1
+			        // Increment the minor version by 1
+			        minor += 1
 			
-			        // Form the new tag with the incremented patch version
-			        newTag = "${major}.${minor}.${String.format('%.1f', patch)}" // Format to one decimal place
-			
+			        // Form the new tag
+			        newTag = "${major}.${minor}"
 			        echo "New tag to be used: ${newTag}"
 			    } else {
 			        echo "Invalid latest tag format: ${latestTag}, using default tag: 1.0"
