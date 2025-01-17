@@ -115,7 +115,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			}
 			
 			// Get the latest tag if tags are present
-			def newTag
+			newTag
 			if (tags.size() > 0) {
 			    // Sort tags in ascending order (to get the latest tag)
 			    def latestTag = tags.sort { a, b ->
