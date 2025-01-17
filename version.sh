@@ -28,8 +28,10 @@ NEW_VERSION="$MAJOR.$MINOR"
 # Update the version.txt file with the new version
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Check if the file was updated successfully
-cat "$VERSION_FILE"
+# Commit and push the changes to GitHub (assuming your GitHub credentials are set up)
+git add "$VERSION_FILE"
+git commit -m "Update version to $NEW_VERSION"
+git push origin main  # Replace 'main' with the appropriate branch name if needed
 
 # Return only the version for Jenkins pipeline usage
 echo "$NEW_VERSION"
