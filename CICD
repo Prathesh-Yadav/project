@@ -92,72 +92,15 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			def dockerRepoUrl = "http://13.233.32.31:8081/service/rest/v1/components?repository=carapp_docker"
 			def dockerUsername = "admin"
 			def dockerPassword = "admin"
-			def newTag = ""
 			
-			// Fetch tags from Nexus using curl
-			def response = sh(
-			    script: "curl -u ${dockerUsername}:${dockerPassword} -s ${dockerRepoUrl}",
-			    returnStdout: true
-			).trim()
-			
-			// Parse the response as JSON and extract tags
-			def jsonResponse = readJSON text: response
-			def tags = []
-			
-			// Extract tags from the response (assuming "version" holds tag information)
-			jsonResponse.items.each { item ->
-			    if (item.version) {
-			        tags.add(item.version)
-			    }
-			}
-			
-			// Get the latest tag if tags are present
-			if (tags.size() > 0) {
-			    // Sort tags in ascending order (to get the latest tag)
-			    def latestTag = tags.sort { a, b ->
-			        def aParts = a.split('\\.')
-			        def bParts = b.split('\\.')
-			
-			        // Ensure both tags have at least 2 parts for comparison
-			        if (aParts.size() < 2 || bParts.size() < 2) {
-			            return 0 // Skip invalid tags
-			        }
-			
-			        return [aParts[0].toInteger(), aParts[1].toInteger()] <=> 
-			               [bParts[0].toInteger(), bParts[1].toInteger()]
-			    }.last()
-			
-			    // Split the latest tag into parts and increment the minor version
-			    def parts = latestTag.split('\\.')
-			    if (parts.size() == 2) { // Ensure tag has exactly two parts
-			        def major = parts[0].toInteger()
-			        def minor = parts[1].toInteger()
-			
-			        // Increment the minor version by 1
-			        minor += 1
-			
-			        // Form the new tag
-			        newTag = "${major}.${minor}"
-			        echo "New tag to be used: ${newTag}"
-			    } else {
-			        echo "Invalid latest tag format: ${latestTag}, using default tag: 1.0"
-			        newTag = "1.0"
-			    }
-			} else {
-			    // If no tags found, use a default tag
-			    def defaultTag = "1.0" // Set default tag
-			    echo "No tags found in Nexus, using default tag: ${defaultTag}"
-			    newTag = defaultTag
-			}
-			
-			// Build the Docker image
-			echo "Building the Docker image with tag ${newTag}..."
 
 	 withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
          sh """
                 echo \$DOCKER_PASSWORD | docker login http://13.233.32.31:5067 --username \$DOCKER_USERNAME --password-stdin
 		curl -I http://13.233.32.31:5067/v2/
-                docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
+                chmod +x version.sh
+        	newTag=$(./version.sh)
+		docker build -t ${dockerImageName}:${newTag} -f docker/Dockerfile docker
                 docker tag ${dockerImageName}:${newTag} 13.233.32.31:5067/repository/carapp_docker/carapp:${newTag}
                 docker push 13.233.32.31:5067/repository/carapp_docker/carapp:${newTag}
             """
