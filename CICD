@@ -116,38 +116,27 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			
 			// Get the latest tag if tags are present
 			if (tags.size() > 0) {
-			    // Compare versions
-			    def version1 = jsonResponse.items[0].version
-			    def version2 = jsonResponse.items[1].version
-			
-			    if (version1 == version2) {
-			        echo "Versions are equal"
-			    }
-			
-			    // Sort tags in descending order and get the latest one
+			    // Sort tags in ascending order (to get the latest tag)
 			    def latestTag = tags.sort { a, b ->
 			        def aParts = a.split('\\.')
 			        def bParts = b.split('\\.')
 			        return [aParts[0].toInteger(), aParts[1].toInteger()] <=> [bParts[0].toInteger(), bParts[1].toInteger()]
 			    }.last()
 			
-			    echo "Latest tag found: ${latestTag}"
-			
-			    // Increment the version: Check if the minor version is < 9, otherwise, increment the major version
+			    // Increment the version: Increment minor version by 0.1
 			    def parts = latestTag.split('\\.')
 			    def major = parts[0].toInteger()
 			    def minor = parts[1].toInteger()
 			
-			    if (minor < 9) {
-			        minor += 1 // Increment minor version by 1
-			    } else {
-			        major += 1 // Increment major version
-			        minor = 0 // Reset minor version to 0
-			    }
+			    // Increment minor version by 1
+			    minor += 1
 			
-			    newTag = "${major}.${minor}"
+			    // Form the new tag
+			    def newTag = "${major}.${minor}"
 			
+			    // Set the newTag to be used
 			    echo "New tag to be used: ${newTag}"
+			
 			} else {
 			    // If no tags found, use a default tag
 			    def defaultTag = "1.0" // Set default tag
