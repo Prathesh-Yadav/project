@@ -28,7 +28,7 @@ NEW_VERSION="$MAJOR.$MINOR"
 # Update the version.txt file with the new version
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Commit and push the changes to GitHub (assuming your GitHub credentials are set up)
+# Commit and push the changes to GitHub (using Jenkins credentials)
 git add "$VERSION_FILE"
 git commit -m "Update version to $NEW_VERSION"
 git push origin main  # Replace 'main' with the appropriate branch name if needed
