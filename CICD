@@ -115,25 +115,26 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			}
 			
 			// Get the latest tag if tags are present
-			newTag
+			def newTag
 			if (tags.size() > 0) {
 			    // Sort tags in ascending order (to get the latest tag)
 			    def latestTag = tags.sort { a, b ->
 			        def aParts = a.split('\\.')
 			        def bParts = b.split('\\.')
-			        return [aParts[0].toInteger(), aParts[1].toInteger()] <=> [bParts[0].toInteger(), bParts[1].toInteger()]
+			        return [aParts[0].toInteger(), aParts[1].toInteger(), aParts[2].toInteger()] <=> [bParts[0].toInteger(), bParts[1].toInteger(), bParts[2].toInteger()]
 			    }.last()
 			
-			    // Increment the version: Increment minor version by 0.1
+			    // Split the latest tag into parts and increment the decimal value
 			    def parts = latestTag.split('\\.')
 			    def major = parts[0].toInteger()
 			    def minor = parts[1].toInteger()
+			    def patch = parts[2].toFloat()
 			
-			    // Increment minor version by 1
-			    minor += 1
+			    // Increment the patch version by 0.1
+			    patch += 0.1
 			
-			    // Form the new tag with 1 decimal increment
-			    newTag = "${major}.${minor}"
+			    // Form the new tag with the incremented patch version
+			    newTag = "${major}.${minor}.${patch.toString().substring(0, 3)}" // Limit to one decimal place
 			
 			    // Set the newTag to be used
 			    echo "New tag to be used: ${newTag}"
