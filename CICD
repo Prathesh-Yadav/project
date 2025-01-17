@@ -116,30 +116,40 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			}
 			
 			// Get the latest tag if tags are present
-			newTag
 			if (tags.size() > 0) {
 			    // Sort tags in ascending order (to get the latest tag)
 			    def latestTag = tags.sort { a, b ->
 			        def aParts = a.split('\\.')
 			        def bParts = b.split('\\.')
-			        return [aParts[0].toInteger(), aParts[1].toInteger(), aParts[2].toFloat()] <=> [bParts[0].toInteger(), bParts[1].toInteger(), bParts[2].toFloat()]
+			        
+			        // Ensure both tags have at least 3 parts for comparison
+			        if (aParts.size() < 3 || bParts.size() < 3) {
+			            echo "Skipping invalid tag comparison: a=${a}, b=${b}"
+			            return 0 // Skip invalid tags
+			        }
+			        
+			        return [aParts[0].toInteger(), aParts[1].toInteger(), aParts[2].toFloat()] <=> 
+			               [bParts[0].toInteger(), bParts[1].toInteger(), bParts[2].toFloat()]
 			    }.last()
 			
 			    // Split the latest tag into parts and increment the decimal value
 			    def parts = latestTag.split('\\.')
-			    def major = parts[0].toInteger()
-			    def minor = parts[1].toInteger()
-			    def patch = parts[2].toFloat()
+			    if (parts.size() == 3) { // Ensure tag has exactly three parts
+			        def major = parts[0].toInteger()
+			        def minor = parts[1].toInteger()
+			        def patch = parts[2].toFloat()
 			
-			    // Increment the patch version by 0.1
-			    patch += 0.1
+			        // Increment the patch version by 0.1
+			        patch += 0.1
 			
-			    // Form the new tag with the incremented patch version
-			    newTag = "${major}.${minor}.${String.format('%.1f', patch)}" // Format to one decimal place
+			        // Form the new tag with the incremented patch version
+			        newTag = "${major}.${minor}.${String.format('%.1f', patch)}" // Format to one decimal place
 			
-			    // Set the newTag to be used
-			    echo "New tag to be used: ${newTag}"
-			
+			        echo "New tag to be used: ${newTag}"
+			    } else {
+			        echo "Invalid latest tag format: ${latestTag}, using default tag: 1.0"
+			        newTag = "1.0"
+			    }
 			} else {
 			    // If no tags found, use a default tag
 			    def defaultTag = "1.0" // Set default tag
