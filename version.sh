@@ -3,13 +3,10 @@
 # File to store the current version
 VERSION_FILE="version.txt"
 
-# Default version if the file doesn't exist
-DEFAULT_VERSION="1.0"
-
 # Check if the version file exists
 if [ ! -f "$VERSION_FILE" ]; then
-  # If not, create it with the default version
-  echo "$DEFAULT_VERSION" > "$VERSION_FILE"
+  # If not, create it with the default version (1.0)
+  echo "1.0" > "$VERSION_FILE"
 fi
 
 # Read the current version from the file
@@ -35,4 +32,4 @@ NEW_VERSION="$MAJOR.$MINOR"
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
 # Display the new version
-echo "Updated version: $NEW_VERSION"
+echo "$NEW_VERSION"
