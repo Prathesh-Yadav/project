@@ -133,7 +133,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
                         def parts = maxTag.split('\\.')
                         def major = parts[0].toInteger()
                         def minor = parts[1].toInteger() + 1 // Increment the minor version by 1
-                        def newTag = "${major}.${minor}"
+                        newTag = "${major}.${minor}"
 
                         echo "New tag to be used: ${newTag}"
                     } else {
