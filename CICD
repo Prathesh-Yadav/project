@@ -8,7 +8,7 @@ pipeline {
 	}
 
   stages {
-/*
+
     stage('Build') {
       steps {
         sh 'mvn clean install'
@@ -37,7 +37,7 @@ pipeline {
         }
       }
     }
-    
+    /*
     stage("Sonar Quality Gate Check") {
       steps {
         timeout(time: 1, unit: 'HOURS') {
@@ -50,7 +50,7 @@ pipeline {
         }
       }
     }
-
+*/
     stage('Upload to Nexus') {
       steps {
         nexusArtifactUploader(
@@ -70,7 +70,7 @@ pipeline {
         )
       }
     }
-
+/*
  stage('Debug Docker Login and Registry Access') {
         steps {
         	withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -83,9 +83,9 @@ pipeline {
         }
 */
 stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
-agent{
-	label "docker"
-}
+    agent {
+        label "docker"
+    }
             steps {
                 script {
                     def dockerImageName = "carapp"
