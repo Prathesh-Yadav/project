@@ -1,35 +1,35 @@
 #!/bin/bash
 
-# File to store the current version
+# Path to the version.txt file
 VERSION_FILE="version.txt"
 
-# Check if the version file exists
-if [ ! -f "$VERSION_FILE" ]; then
-  # If not, create it with the default version (1.0)
-  echo "1.0" > "$VERSION_FILE"
+# Read the current version from the version.txt file (assuming it's in "MAJOR.MINOR" format)
+if [[ -f "$VERSION_FILE" ]]; then
+    VERSION=$(cat "$VERSION_FILE")
+else
+    VERSION="0.9"  # Default if version.txt is empty or missing
 fi
 
-# Read the current version from the file
-CURRENT_VERSION=$(cat "$VERSION_FILE")
+# Split the version into MAJOR and MINOR parts
+MAJOR=$(echo "$VERSION" | cut -d '.' -f 1)
+MINOR=$(echo "$VERSION" | cut -d '.' -f 2)
 
-# Extract the major and minor parts of the version
-MAJOR=${CURRENT_VERSION%.*}
-MINOR=${CURRENT_VERSION#*.}
-
-# Increment the minor version
-((MINOR++))
-
-# If the minor version reaches 10, reset it and increment the major version
-if [ "$MINOR" -ge 10 ]; then
-  MINOR=0
-  ((MAJOR++))
+# Check if MINOR is 9, then increment MAJOR and reset MINOR to 0
+if [ "$MINOR" -ge 9 ]; then
+    MAJOR=$((MAJOR + 1))  # Increment MAJOR
+    MINOR=0               # Reset MINOR to 0
+else
+    MINOR=$((MINOR + 1))  # Otherwise, just increment MINOR
 fi
 
-# Create the new version
+# Create the new version (MAJOR.MINOR)
 NEW_VERSION="$MAJOR.$MINOR"
 
-# Update the version file
+# Update the version.txt file with the new version
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
 # Display the new version
+echo "New version: $NEW_VERSION"
+
+# Return the new version for use in Jenkins pipeline
 echo "$NEW_VERSION"
