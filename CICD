@@ -137,3 +137,4 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 
   }
 }
+}
