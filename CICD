@@ -132,7 +132,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			    minor += 1
 			
 			    // Form the new tag
-			    def newTag = "${major}.${minor}"
+			    newTag = "${major}.${minor}"
 			
 			    // Set the newTag to be used
 			    echo "New tag to be used: ${newTag}"
