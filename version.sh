@@ -31,5 +31,5 @@ echo "$NEW_VERSION" > "$VERSION_FILE"
 # Display the new version
 echo "New version: $NEW_VERSION"
 
-# Return the new version for use in Jenkins pipeline
+# Return only the version for Jenkins pipeline usage
 echo "$NEW_VERSION"
