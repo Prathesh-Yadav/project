@@ -103,6 +103,8 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
                     # Ensure the version.txt file is updated
                     chmod 777 version.sh
 		    chmod 777 version.txt
+		    pwd
+       		    ls
 		    newTag=$(./version.sh)   # Get the new version tag from version.sh
                     newTag=$(echo "$newTag" | tr -d '\n' | tr -d ' ')  # Remove newline and spaces
 
