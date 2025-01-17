@@ -28,8 +28,5 @@ NEW_VERSION="$MAJOR.$MINOR"
 # Update the version.txt file with the new version
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Display the new version
-echo "New version: $NEW_VERSION"
-
 # Return only the version for Jenkins pipeline usage
 echo "$NEW_VERSION"
