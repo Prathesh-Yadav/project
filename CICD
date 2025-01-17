@@ -97,14 +97,11 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 	 withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
 		sh '''
 		    echo \$DOCKER_PASSWORD | docker login http://13.233.32.31:5067 --username \$DOCKER_USERNAME --password-stdin
-		    pwd
-		    ls -al
-		    #chmod +x .version.sh
-		    #newTag=$(./version.sh)
-		   # echo "New tag: $newTag"
-		    #docker build -t \${dockerImageName}:\${newTag} -f docker/Dockerfile docker
-		    #docker tag \${dockerImageName}:\${newTag} 13.233.32.31:5067/repository/carapp_docker/carapp:\${newTag}
-		   # docker push 13.233.32.31:5067/repository/carapp_docker/carapp:\${newTag}
+		newTag=$(./version.sh)
+		echo "New tag: $newTag"
+		docker build -t \${dockerImageName}:\${newTag} -f docker/Dockerfile docker
+		docker tag \${dockerImageName}:\${newTag} 13.233.32.31:5067/repository/carapp_docker/carapp:\${newTag}
+		docker push 13.233.32.31:5067/repository/carapp_docker/carapp:\${newTag}
 		'''
 
 
