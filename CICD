@@ -114,21 +114,19 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			    }
 			}
 			
-			// Print the tags found
+			// Get the latest tag if tags are present
 			if (tags.size() > 0) {
-			    echo "Tags found in Nexus: ${tags.join(', ')}"
-			
-			    // Get the latest tag from the list (assuming the tags follow the format X.Y)
-			    def maxTag = tags.sort { a, b ->
+			    // Sort tags in descending order and get the latest one
+			    def latestTag = tags.sort { a, b ->
 			        def aParts = a.split('\\.')
 			        def bParts = b.split('\\.')
 			        return [aParts[0].toInteger(), aParts[1].toInteger()] <=> [bParts[0].toInteger(), bParts[1].toInteger()]
 			    }.last()
 			
-			    echo "Latest tag found: ${maxTag}"
+			    echo "Latest tag found: ${latestTag}"
 			
-			    // Increment the version by 0.1
-			    def parts = maxTag.split('\\.')
+			    // Increment the minor version by 0.1
+			    def parts = latestTag.split('\\.')
 			    def major = parts[0].toInteger()
 			    def minor = parts[1].toInteger() + 1 // Increment the minor version by 1
 			    newTag = "${major}.${minor}"
