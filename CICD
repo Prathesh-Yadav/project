@@ -102,7 +102,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			).trim()
 			
 			// Print the raw response for debugging
-			echo "Response from Nexus: ${response}"
+			//echo "Response from Nexus: ${response}"
 			
 			// Parse the response as JSON and extract tags
 			def jsonResponse = readJSON text: response
