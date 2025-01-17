@@ -4,6 +4,8 @@ pipeline {
   }
   environment {
     PATH = "/apache-maven-3.9.9/bin:/usr/bin:/bin:/usr/local/bin"
+    DOCKER_USERNAME = 'admin'
+    DOCKER_PASSWORD = 'admin'
 	}
 
   stages {
