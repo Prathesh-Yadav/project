@@ -101,7 +101,9 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
                     git config --global user.email "pratheshyadav67@gmail.com"
 
                     # Ensure the version.txt file is updated
-                    newTag=$(./version.sh)   # Get the new version tag from version.sh
+                    chmod 777 version.sh
+		    chmod 777 version.txt
+		    newTag=$(./version.sh)   # Get the new version tag from version.sh
                     newTag=$(echo "$newTag" | tr -d '\n' | tr -d ' ')  # Remove newline and spaces
 
                     # Output version for verification
