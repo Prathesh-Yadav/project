@@ -69,7 +69,7 @@ pipeline {
         )
       }
     }
-
+/*
  stage('Debug Docker Login and Registry Access') {
         steps {
         	withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
@@ -80,6 +80,7 @@ pipeline {
                 }
             }
         }
+*/
 stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
             steps {
                 script {
