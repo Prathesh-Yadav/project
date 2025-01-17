@@ -4,7 +4,7 @@
 VERSION_FILE="version.txt"
 
 # Default version if the file doesn't exist
-DEFAULT_VERSION="0.9"
+DEFAULT_VERSION="1.0"
 
 # Check if the version file exists
 if [ ! -f "$VERSION_FILE" ]; then
@@ -34,5 +34,5 @@ NEW_VERSION="$MAJOR.$MINOR"
 # Update the version file
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Display the new version
-echo "Updated version: $NEW_VERSION"
+# Output only the version (no extra text)
+echo "$NEW_VERSION"
