@@ -116,6 +116,14 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			
 			// Get the latest tag if tags are present
 			if (tags.size() > 0) {
+			    // Compare versions
+			    def version1 = jsonResponse.items[0].version
+			    def version2 = jsonResponse.items[1].version
+			
+			    if (version1 == version2) {
+			        echo "Versions are equal"
+			    }
+			
 			    // Sort tags in descending order and get the latest one
 			    def latestTag = tags.sort { a, b ->
 			        def aParts = a.split('\\.')
