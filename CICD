@@ -100,7 +100,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 		chmod 777 version.sh
 		chmod 777 version.txt
 		pwd
-		ll
+		ls
 		newTag=$(./version.sh)
 		echo "New tag: $newTag"
 		docker build -t carapp:\${newTag} -f docker/Dockerfile docker
