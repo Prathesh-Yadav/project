@@ -98,7 +98,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 		sh '''
 		    chmod 777 version.sh
 		    chmod 777 version.txt
-		    ./version.sh
+		    newTag=$(./version.sh)
 		    pwd
 		    ls
 		    git config --global user.name "Prathesh-Yadav"
