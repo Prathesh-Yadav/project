@@ -43,4 +43,4 @@ git commit -m "Update version to $NEW_VERSION" || true
 git push https://"$GIT_USERNAME":"$GIT_PASSWORD"@github.com/Prathesh-Yadav/project.git main
 
 # Output the new version
-echo "New Version: $NEW_VERSION"
+echo "$NEW_VERSION"
