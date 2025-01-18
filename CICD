@@ -103,7 +103,8 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 		    newTag=$(./version.sh)
 		
 		    # Clean up newTag to extract only the version number (e.g., 1.0, 1.1, 1.2)
-		    newTag = (newTag =~ /\d+\.\d+/)[0]
+		    newTag = sh(script: "echo \"$newTag\" | grep -oP '\\d+\\.\\d+'", returnStdout: true).trim()
+
 		
 		    echo "New tag extracted: $newTag"
 		
