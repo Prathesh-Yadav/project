@@ -5,7 +5,7 @@ VERSION_FILE="version.txt"
 
 # Read the current version from the version.txt file (assuming it's in "MAJOR.MINOR" format)
 if [[ -f "$VERSION_FILE" ]]; then
-    VERSION=$(cat "$VERSION_FILE")
+    VERSION=$(<"$VERSION_FILE")
 else
     VERSION="0.9"  # Default if version.txt is empty or missing
 fi
@@ -14,24 +14,27 @@ fi
 MAJOR=$(echo "$VERSION" | cut -d '.' -f 1)
 MINOR=$(echo "$VERSION" | cut -d '.' -f 2)
 
-# Check if MINOR is 9, then increment MAJOR and reset MINOR to 0
-if [ "$MINOR" -ge 9 ]; then
-    MAJOR=$((MAJOR + 1))  # Increment MAJOR
-    MINOR=0               # Reset MINOR to 0
+# Increment version
+if [[ "$MINOR" -ge 9 ]]; then
+    MAJOR=$((MAJOR + 1))
+    MINOR=0
 else
-    MINOR=$((MINOR + 1))  # Otherwise, just increment MINOR
+    MINOR=$((MINOR + 1))
 fi
 
-# Create the new version (MAJOR.MINOR)
 NEW_VERSION="$MAJOR.$MINOR"
 
-# Update the version.txt file with the new version
+# Update the version.txt file
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Commit and push the changes to GitHub (using Jenkins credentials)
+# Ensure Git is in sync with remote
+git checkout main
+git pull origin main
+
+# Stage, commit, and push changes
 git add "$VERSION_FILE"
 git commit -m "Update version to $NEW_VERSION"
-git push origin main  # Replace 'main' with the appropriate branch name if needed
+git push origin main
 
-# Return only the version for Jenkins pipeline usage
+# Output the new version for Jenkins
 echo "$NEW_VERSION"
