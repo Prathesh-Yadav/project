@@ -93,42 +93,47 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			def dockerUsername = "admin"
 			def dockerPassword = "admin"
 			
-
+	withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 	 withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                 sh '''
-     
-                    git config --global user.name "Prathesh-Yadav"
-                    git config --global user.email "pratheshyadav67@gmail.com"
+                sh '''
+                            # Configure Git credentials
+                            git config --global user.name "Prathesh-Yadav"
+                            git config --global user.email "pratheshyadav67@gmail.com"
 
-      
-                    chmod 777 version.sh
-                    chmod 777 version.txt
-                    pwd
-                    ls
+                            # Set permissions for script and version file
+                            chmod 777 version.sh
+                            chmod 777 version.txt
+                            
+                            # Print current directory and list files for debugging
+                            pwd
+                            ls
 
-  
-                    newTag=$(./version.sh)  # Get the new version tag from version.sh
-                    newTag=$(echo "$newTag" | tr -d '\n' | tr -d ' ')  # Remove newline and spaces
+                            # Run version.sh to get the new version tag
+                            newTag=$(./version.sh)
+                            newTag=$(echo "$newTag" | tr -d '\n' | tr -d ' ')  # Remove newline and spaces
 
-               
-                    echo "New Version: $newTag"
+                            echo "New Version: $newTag"
 
-          
-                    git checkout main
+                            # Checkout the main branch
+                            git checkout main
 
-            
-                    git add version.txt
-                    git commit -m "Update version to $newTag"
-                    git push origin main  # Replace 'main' with the appropriate branch name
+                            # Add and commit version updates
+                            git add version.txt
+                            git commit -m "Update version to $newTag"
+                            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Prathesh-Yadav/project.git main
 
-               
-                    docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin <<< $DOCKER_PASSWORD
-                    docker build -t carapp:$newTag -f docker/Dockerfile docker
-                    docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
-                    docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
-                    '''
+                            # Login to Docker registry
+                            echo $DOCKER_PASSWORD | docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin
 
+                            # Build and tag the Docker image
+                            docker build -t carapp:$newTag -f docker/Dockerfile docker
+                            docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
 
+                            # Push the Docker image to the registry
+                            docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+                        '''
+
+				}
         		}
                 }
             }
