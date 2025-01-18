@@ -27,11 +27,16 @@ NEW_VERSION="$MAJOR.$MINOR"
 # Update the version.txt file
 echo "$NEW_VERSION" > "$VERSION_FILE"
 
-# Ensure Git is in sync with remote
+# Stage and commit any existing changes to avoid conflicts
+git add .
+git commit -m "WIP: Commit changes before switching branches" || true
+
+# Ensure Git is in sync with the remote repository
+git fetch origin
 git checkout main
 git pull origin main
 
-# Stage, commit, and push changes
+# Stage, commit, and push the new version
 git add "$VERSION_FILE"
 git commit -m "Update version to $NEW_VERSION"
 git push origin main
