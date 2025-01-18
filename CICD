@@ -98,7 +98,8 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 				sh '''
 				    chmod 777 version.sh
 				    chmod 777 version.txt
-				    
+				    pwd
+				    ls -l version.txt
 				    # Run version.sh and capture the output (we assume the version is the last line)
 				    newTag=$(./version.sh | tr -d "'")
 				    
