@@ -43,6 +43,6 @@ git add "$version.txt"
 git commit -m "Update version to $version.txt" || true
 git push https://"$Prathesh-Yadav":"$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"@github.com/Prathesh-Yadav/project.git main --force
 
-cat version.txt
+
 # Output the new version
 echo "$NEW_VERSION"
