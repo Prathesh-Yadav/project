@@ -22,6 +22,7 @@ fi
 NEW_VERSION="$MAJOR.$MINOR"
 
 # Update the version file
+chmod 777 version.txt
 echo "$NEW_VERSION" > "$version.txt"
 
 # Configure Git credentials
