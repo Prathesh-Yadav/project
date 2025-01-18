@@ -118,7 +118,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 		    git config --global user.email "pratheshyadav67@gmail.com"
 		    
 		    # Stage version.sh and version.txt
-		    git add version.sh version.txt
+		    git add version.txt
 		    
 		    # Check for changes and commit if necessary
 		    if git diff-index --quiet HEAD --; then
