@@ -95,52 +95,53 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			
 	withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 	 withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-			sh '''
-			    chmod 777 version.sh
-			    chmod 777 version.txt
-			    
-			    # Run version.sh and capture the output
-			    newTag=$(./version.sh)
-			
-			    # Clean up newTag by extracting only the version (assume version is the last part)
-			    newTag=$(echo "$newTag" | awk '{print $NF}' | tr -d '\n')
-			    
-			    echo "New tag extracted: $newTag"
-			
-			    # Ensure newTag is valid
-			    if [ -z "$newTag" ]; then
-			        echo "Error: newTag is empty"
-			        exit 1
-			    fi
-			
-			    # Configure Git
-			    git config --global user.name "Prathesh-Yadav"
-			    git config --global user.email "pratheshyadav67@gmail.com"
-			
-			    # Stage version.sh and version.txt
-			    git add version.sh version.txt
-			
-			    # Check for changes and commit if necessary
-			    if git diff-index --quiet HEAD --; then
-			        echo "No changes to commit, working tree clean"
-			    else
-			        git commit -m "Update version"
-			        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Prathesh-Yadav/project.git main
-			    fi
-			
-			    # Print the final newTag to confirm its value
-			    echo "Final tag to use: $newTag"
-			
-			    # Login to Docker registry
-			    echo $DOCKER_PASSWORD | docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin
-			
-			    # Build and tag Docker image
-			    docker build -t carapp:$newTag -f docker/Dockerfile docker
-			    docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
-			
-			    # Push Docker image to registry
-			    docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
-			'''
+		sh '''
+		    chmod 777 version.sh
+		    chmod 777 version.txt
+		    
+		    # Run version.sh and capture the output (we assume the version is the last line)
+		    newTag=$(./version.sh)
+		
+		    # Clean up newTag to extract only the version number (e.g., 1.0, 1.1, 1.2)
+		    newTag=$(echo "$newTag" | grep -oP '\d+\.\d+' | tail -n 1)
+		
+		    echo "New tag extracted: $newTag"
+		
+		    # Ensure newTag is valid
+		    if [ -z "$newTag" ]; then
+		        echo "Error: newTag is empty"
+		        exit 1
+		    fi
+		
+		    # Configure Git
+		    git config --global user.name "Prathesh-Yadav"
+		    git config --global user.email "pratheshyadav67@gmail.com"
+		
+		    # Stage version.sh and version.txt
+		    git add version.sh version.txt
+		
+		    # Check for changes and commit if necessary
+		    if git diff-index --quiet HEAD --; then
+		        echo "No changes to commit, working tree clean"
+		    else
+		        git commit -m "Update version"
+		        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Prathesh-Yadav/project.git main
+		    fi
+		
+		    # Print the final newTag to confirm its value
+		    echo "Final tag to use: $newTag"
+		
+		    # Login to Docker registry
+		    echo $DOCKER_PASSWORD | docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin
+		
+		    # Build and tag Docker image
+		    docker build -t carapp:$newTag -f docker/Dockerfile docker
+		    docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+		
+		    # Push Docker image to registry
+		    docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+		'''
+
 
 
 				}
