@@ -26,8 +26,8 @@ chmod 777 version.txt
 echo "$NEW_VERSION" > "$version.txt"
 
 # Configure Git credentials
-git config user.name "$GIT_USERNAME"
-git config user.password "$GIT_PASSWORD"
+git config user.name "$Prathesh-Yadav" 
+git config user.password "$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" 
 
 # Ensure changes are committed before switching branches
 git add .
@@ -41,7 +41,7 @@ git pull origin main
 # Commit and push the version update
 git add "$version.txt"
 git commit -m "Update version to $version.txt" || true
-git push https://"$GIT_USERNAME":"$GIT_PASSWORD"@github.com/Prathesh-Yadav/project.git main
+git push https://"$Prathesh-Yadav":"$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"@github.com/Prathesh-Yadav/project.git main 
 
 # Output the new version
 echo "$NEW_VERSION"
