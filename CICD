@@ -95,37 +95,49 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
 			
 	withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 	 withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-sh '''
-                        chmod +x version.sh
-                        ./version.sh
+		sh '''
+		    chmod 777 version.sh
+		    chmod 777 version.txt
+		    ./version.sh
+		    pwd
+		    ls
+		    git config --global user.name "Prathesh-Yadav"
+		    git config --global user.email "pratheshyadav67@gmail.com"
+		
+		    # Stage the version file changes (both version.sh and version.txt)
+		    git add version.sh version.txt
+		
+		    # Check if there are changes to commit
+		    if git diff-index --quiet HEAD --; then
+		        echo "No changes to commit, working tree clean"
+		    else
+		        # Commit the changes if there are any
+		        git commit -m "Update version"
+		        
+		        # Push the changes to GitHub
+		        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Prathesh-Yadav/project.git main
+		    fi
+		
+		    # Ensure newTag has a value
+		    if [ -z "$newTag" ]; then
+		        echo "Error: newTag is empty"
+		        exit 1
+		    fi
+		
+		    # Print the value of newTag
+		    echo "New tag is: $newTag"
+		
+		    # Login to Docker registry
+		    echo $DOCKER_PASSWORD | docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin
+		
+		    # Build and tag the Docker image
+		    docker build -t carapp:$newTag -f docker/Dockerfile docker
+		    docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+		
+		    # Push the Docker image to the registry
+		    docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+		'''
 
-                        git config --global user.name "Prathesh-Yadav"
-                        git config --global user.email "pratheshyadav67@gmail.com"
-
-                        # Stage the version file changes (both version.sh and version.txt)
-                        git add version.sh version.txt
-
-                        # Check if there are changes to commit
-                        if git diff-index --quiet HEAD --; then
-                            echo "No changes to commit, working tree clean"
-                        else
-                            # Commit the changes if there are any
-                            git commit -m "Update version"
-                            
-                            # Push the changes to GitHub
-                            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Prathesh-Yadav/project.git main
-                        fi
-
-                            # Login to Docker registry
-                            echo $DOCKER_PASSWORD | docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin
-
-                            # Build and tag the Docker image
-                            docker build -t carapp:$newTag -f docker/Dockerfile docker
-                            docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
-
-                            # Push the Docker image to the registry
-                            docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
-                        '''
 
 				}
         		}
