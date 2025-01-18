@@ -1,0 +1,148 @@
+pipeline {
+  agent {
+    label "java"
+  }
+  environment {
+    PATH = "/apache-maven-3.9.9/bin:/usr/bin:/bin:/usr/local/bin"
+    dockerRepoUrl1 = "http://13.233.223.150:5067/repository/carapp_docker"
+	}
+
+  stages {
+
+    stage('Build') {
+      steps {
+        sh 'mvn clean install'
+      }
+    }
+
+    stage('jacoco') {
+      steps {
+        jacoco()
+      }
+    }
+    
+    stage('SonarQube analysis') {
+      steps {
+        script {
+          def scannerHome = tool 'scanner_sonar'
+          withSonarQubeEnv('jenkins-sonar') {
+            sh """
+              ${scannerHome}/bin/sonar-scanner \
+              -Dsonar.projectKey=javawebapp \
+              -Dsonar.projectName=javawebapp \
+              -Dsonar.projectVersion=1.0 \
+              -Dsonar.java.binaries='target/classes'
+            """
+          }
+        }
+      }
+    }
+    /*
+    stage("Sonar Quality Gate Check") {
+      steps {
+        timeout(time: 1, unit: 'HOURS') {
+          script {
+            def qualityGate = waitForQualityGate()
+            if (qualityGate.status != 'OK') {
+              error "Pipeline aborted due to quality gate failure: ${qualityGate.status}"
+            }
+          }
+        }
+      }
+    }
+*/
+    stage('Upload to Nexus') {
+      steps {
+        nexusArtifactUploader(
+          artifacts: [[
+            artifactId: 'SimpleWebApplication', 
+            classifier: '', 
+            file: 'target/SimpleWebApplication.war', 
+            type: 'war'
+          ]], 
+          credentialsId: 'nexus', 
+          groupId: 'com.maven', 
+          nexusUrl: '13.233.223.150:8081/', 
+          nexusVersion: 'nexus3', 
+          protocol: 'http', 
+          repository: 'carapp', 
+          version: '1.0.0-SNAPSHOT'
+        )
+      }
+    }
+/*
+ stage('Debug Docker Login and Registry Access') {
+        steps {
+        	withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh """
+                    echo $DOCKER_PASSWORD | docker login --insecure-registry http://13.233.32.31:5067 --username $DOCKER_USERNAME --password-stdin
+                    curl -I http://13.233.223.150:5067/v2/
+                    """
+                }
+            }
+        }
+*/
+stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
+    agent {
+        label "docker"
+    }
+            steps {
+                script {
+			def dockerImageName = "carapp"
+			def dockerRepoUrl = "http://13.233.223.150:8081/service/rest/v1/components?repository=carapp_docker"
+			def dockerUsername = "admin"
+			def dockerPassword = "admin"
+			
+	withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+	 withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+		sh '''
+		    chmod 777 version.sh
+		    chmod 777 version.txt
+		    newTag=$(./version.sh)
+		    pwd
+		    ls
+		    git config --global user.name "Prathesh-Yadav"
+		    git config --global user.email "pratheshyadav67@gmail.com"
+		
+		    # Stage the version file changes (both version.sh and version.txt)
+		    git add version.sh version.txt
+		
+		    # Check if there are changes to commit
+		    if git diff-index --quiet HEAD --; then
+		        echo "No changes to commit, working tree clean"
+		    else
+		        # Commit the changes if there are any
+		        git commit -m "Update version"
+		        
+		        # Push the changes to GitHub
+		        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Prathesh-Yadav/project.git main
+		    fi
+		
+		    # Ensure newTag has a value
+		    if [ -z "$newTag" ]; then
+		        echo "Error: newTag is empty"
+		        exit 1
+		    fi
+		
+		    # Print the value of newTag
+		    echo "New tag is: $newTag"
+		
+		    # Login to Docker registry
+		    echo $DOCKER_PASSWORD | docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin
+		
+		    # Build and tag the Docker image
+		    docker build -t carapp:$newTag -f docker/Dockerfile docker
+		    docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+		
+		    # Push the Docker image to the registry
+		    docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+		'''
+
+
+				}
+        		}
+                }
+            }
+        }
+}
+}
