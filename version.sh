@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Set the path for version.txt
-VERSION_FILE="version.txt"
+#VERSION_FILE="version.txt"
 
 # Read the current version or set default
-if [[ -f "$VERSION_FILE" ]]; then
-    VERSION=$(<"$VERSION_FILE")
+if [[ -f "$version.txt" ]]; then
+    VERSION=$(<"$version.txt")
 else
     VERSION="0.9"
 fi
@@ -22,7 +22,7 @@ fi
 NEW_VERSION="$MAJOR.$MINOR"
 
 # Update the version file
-echo "$NEW_VERSION" > "$VERSION_FILE"
+echo "$NEW_VERSION" > "$version.txt"
 
 # Configure Git credentials
 git config user.name "$GIT_USERNAME"
@@ -38,8 +38,8 @@ git checkout main
 git pull origin main
 
 # Commit and push the version update
-git add "$VERSION_FILE"
-git commit -m "Update version to $NEW_VERSION" || true
+git add "$version.txt"
+git commit -m "Update version to $version.txt" || true
 git push https://"$GIT_USERNAME":"$GIT_PASSWORD"@github.com/Prathesh-Yadav/project.git main
 
 # Output the new version
