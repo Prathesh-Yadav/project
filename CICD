@@ -4,7 +4,7 @@ pipeline {
   }
   environment {
     PATH = "/apache-maven-3.9.9/bin:/usr/bin:/bin:/usr/local/bin"
-    dockerRepoUrl1 = "http://13.233.32.31:5067/repository/carapp_docker"
+    dockerRepoUrl1 = "http://13.233.223.150:5067/repository/carapp_docker"
 	}
 
   stages {
@@ -62,7 +62,7 @@ pipeline {
           ]], 
           credentialsId: 'nexus', 
           groupId: 'com.maven', 
-          nexusUrl: '13.233.32.31:8081/', 
+          nexusUrl: '13.233.223.150:8081/', 
           nexusVersion: 'nexus3', 
           protocol: 'http', 
           repository: 'carapp', 
@@ -76,7 +76,7 @@ pipeline {
         	withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh """
                     echo $DOCKER_PASSWORD | docker login --insecure-registry http://13.233.32.31:5067 --username $DOCKER_USERNAME --password-stdin
-                    curl -I http://13.233.32.31:5067/v2/
+                    curl -I http://13.233.223.150:5067/v2/
                     """
                 }
             }
@@ -89,7 +89,7 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
             steps {
                 script {
 			def dockerImageName = "carapp"
-			def dockerRepoUrl = "http://13.233.32.31:8081/service/rest/v1/components?repository=carapp_docker"
+			def dockerRepoUrl = "http://13.233.223.150:8081/service/rest/v1/components?repository=carapp_docker"
 			def dockerUsername = "admin"
 			def dockerPassword = "admin"
 			
@@ -122,10 +122,10 @@ stage('Download Latest WAR from Nexus, Build image and push back to Nexus') {
                     git push origin main  # Replace 'main' with the appropriate branch name
 
                
-                    docker login http://13.233.32.31:5067 --username $DOCKER_USERNAME --password-stdin <<< $DOCKER_PASSWORD
+                    docker login http://13.233.223.150:5067 --username $DOCKER_USERNAME --password-stdin <<< $DOCKER_PASSWORD
                     docker build -t carapp:$newTag -f docker/Dockerfile docker
-                    docker tag carapp:$newTag 13.233.32.31:5067/repository/carapp_docker/carapp:$newTag
-                    docker push 13.233.32.31:5067/repository/carapp_docker/carapp:$newTag
+                    docker tag carapp:$newTag 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
+                    docker push 13.233.223.150:5067/repository/carapp_docker/carapp:$newTag
                     '''
 
 
