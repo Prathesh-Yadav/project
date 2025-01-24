@@ -69,4 +69,5 @@
 - name: Show ArgoCD initial admin password
   debug:
     msg: "ArgoCD initial admin password is {{ argocd_admin_password.stdout }}"
+  become: yes
 
