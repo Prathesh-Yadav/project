@@ -7,8 +7,7 @@ resource "aws_iam_user_policy_attachment" "this" {
   user       = aws_iam_user.this.name
   policy_arn = var.policy_arns[count.index]
 }
-
-[root@ip-172-31-2-146 IAM]# cat variable.tf 
+ 
 variable "user_name" {
   description = "IAM username"
   type        = string
