@@ -44,6 +44,6 @@ resource "aws_instance" "sonarqube" {
 
               sudo systemctl daemon-reload
               sudo systemctl enable sonarqube
-              sudo systemctl start sonarqube
+              sudo systemctl start sonarqube            
               EOF
 }
