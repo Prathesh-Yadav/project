@@ -10,6 +10,8 @@ resource "aws_instance" "sonarqube" {
 
   user_data = <<-EOF
               #!/bin/bash
+              set -e  # Exit immediately if a command fails
+
               sudo apt update -y
               sudo apt install -y openjdk-17-jdk wget unzip
 
@@ -30,10 +32,8 @@ resource "aws_instance" "sonarqube" {
 
               [Service]
               Type=forking
-              User=sonar
-              Group=sonar
-              ExecStart=/opt/sonarqube/sonarqube-9.9.3.79811/bin/linux-x86-64/sonar.sh start
-              ExecStop=/opt/sonarqube/sonarqube-9.9.3.79811/bin/linux-x86-64/sonar.sh stop
+              ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+              ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
               User=sonar
               Group=sonar
               Restart=always
@@ -42,8 +42,13 @@ resource "aws_instance" "sonarqube" {
               WantedBy=multi-user.target
               EOT
 
+              # Wait for file system sync
+              sleep 10  # Add a delay to ensure the service file is fully written
+
+              # Reload systemd, enable, and start SonarQube
               sudo systemctl daemon-reload
               sudo systemctl enable sonarqube
-              sudo systemctl start sonarqube            
+              sudo systemctl restart sonarqube
+
               EOF
 }
