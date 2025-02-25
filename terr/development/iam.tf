@@ -1,5 +1,5 @@
 module "IAM" {
-  source     = "../modules/IAM"
+  source     = "../module/iam"
   user_name  = "EKS_user"
   policy_arns = [
     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
