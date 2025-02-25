@@ -9,14 +9,17 @@ resource "aws_instance" "jenkins" {
   }
 
   user_data = <<-EOF
-              #!/bin/bash
-              sudo yum update -y
-              sudo yum install -y java-11-openjdk-devel
-              sudo wget -O /etc/yum.repos.d/jenkins.repo \
-                  https://pkg.jenkins.io/redhat-stable/jenkins.repo
-              sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
-              sudo yum install -y jenkins
-              sudo systemctl enable jenkins
-              sudo systemctl start jenkins
-              EOF
+            #!/bin/bash
+            sudo apt update -y
+            sudo apt install -y openjdk-17-jdk
+            curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee \
+              /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+            echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+              https://pkg.jenkins.io/debian-stable binary/" | sudo tee \
+              /etc/apt/sources.list.d/jenkins.list > /dev/null
+            sudo apt update -y
+            sudo apt install -y jenkins
+            sudo systemctl enable jenkins
+            sudo systemctl start jenkins
+            EOF
 }
