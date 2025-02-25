@@ -32,8 +32,10 @@ resource "aws_instance" "sonarqube" {
               Type=forking
               User=sonar
               Group=sonar
-              ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
-              ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+              ExecStart=/opt/sonarqube/sonarqube-9.9.3.79811/bin/linux-x86-64/sonar.sh start
+              ExecStop=/opt/sonarqube/sonarqube-9.9.3.79811/bin/linux-x86-64/sonar.sh stop
+              User=sonar
+              Group=sonar
               Restart=always
 
               [Install]
